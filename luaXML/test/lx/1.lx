@@ -1,0 +1,9 @@
+
+
+function test(props, children)
+    local x = props.x
+    return x + 1
+end
+
+
+print(<test x={1} />)
