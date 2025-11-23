@@ -1,9 +1,21 @@
+print("inicio do test")
 
+local function soma(props, childrens)
+    local soma = 0
+    for _, valor in ipairs(childrens) do
+        soma = soma + valor
+    end
 
-function test(props, children)
-    local x <const> = props.x
-    return x + 1
+    return soma
 end
 
+local pt = function(props, childrens) print(table.unpack(childrens)) end
 
-print(<test x={1} />)
+
+<pt>
+    <soma>
+        {1}{2}{3}
+    <soma/>
+</pt>
+
+print("final do test")

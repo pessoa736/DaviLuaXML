@@ -39,9 +39,15 @@ return function(file)
     else
         local closeStart, closeEnd = code:find("</" .. tagName .. "%s*>", openEnd + 1)
         if not closeEnd then
-            return nil, "Fechamento da tag não encontrado"
+            -- tentar fechamento alternativo <name/>
+            local altStart, altEnd = code:find("<" .. tagName .. "%s*/>", openEnd + 1)
+            if not altEnd then
+                return nil, "Fechamento da tag não encontrado"
+            end
+            tagEnd = altEnd
+        else
+            tagEnd = closeEnd
         end
-        tagEnd = closeEnd
     end
 
     local callStr = fcst(element)

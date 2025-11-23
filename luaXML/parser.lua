@@ -161,7 +161,7 @@ local function parseElement(code, globalStart)
     }
 
     local absoluteStart = globalStart + startTagInit - 1
-    local absoluteEnd = globalStart + startTagEnd - 1
+    local absoluteEnd = nil -- será determinado após encontrar fechamento
 
     -- se for <test .../>
     if selfClosed == "/" then
@@ -174,9 +174,16 @@ local function parseElement(code, globalStart)
     local contentStart = i
 
     while true do
-        -- acha próxima abertura ou fechamento
+        -- acha próxima abertura ou fechamento (suporta fechamento alternativo <name/>)
         local nextOpen = code:find("<"..name.."%f[^%w_][^/]", i)
-        local nextClose = code:find("</"..name.."%s*>", i)
+        local nextCloseStd = code:find("</"..name.."%s*>", i)
+        local nextCloseAlt = code:find("<"..name.."%s*/>", i)
+        local nextClose
+        if nextCloseStd and nextCloseAlt then
+            nextClose = math.min(nextCloseStd, nextCloseAlt)
+        else
+            nextClose = nextCloseStd or nextCloseAlt
+        end
 
         if not nextClose then
             return nil, "Tag de fechamento não encontrada para: " .. name
@@ -192,6 +199,13 @@ local function parseElement(code, globalStart)
             else
                 -- achamos o fechamento correspondente
                 local rawContent = code:sub(contentStart, nextClose - 1)
+                -- determinar fechamento real para posição final
+                local closingPatternStd = "</"..name.."%s*>"
+                local closingPatternAlt = "<"..name.."%s*/>"
+                local _, stdEnd = code:find(closingPatternStd, nextClose)
+                local _, altEnd = code:find(closingPatternAlt, nextClose)
+                local closingEnd = stdEnd or altEnd or (nextClose + #name + 2) -- fallback aproximado
+                absoluteEnd = globalStart + closingEnd - 1
             if trim(rawContent) ~= "" then
                 local pos = 1
                 local len = #rawContent
@@ -225,7 +239,25 @@ local function parseElement(code, globalStart)
                     end
                 end
 
-                return elements:createElement(node.name, node.attrs, node.children), absoluteStart, absoluteEnd
+                -- Se não achou filhos por tags, tentar capturar filhos por expressões em chaves
+                if #node.children == 0 then
+                    for braceContent in rawContent:gmatch("%b{}") do
+                        local inner = braceContent:sub(2, -2)
+                        inner = trim(inner)
+                        if inner ~= "" then
+                            local env = { math = math, tonumber = tonumber, ipairs = ipairs }
+                            local fn = load("return " .. inner, "child", "t", env)
+                            if fn then
+                                local ok, value = pcall(fn)
+                                if ok then
+                                    insert(node.children, value)
+                                end
+                            end
+                        end
+                    end
+                end
+
+                return elements:createElement(node.name, node.attrs, node.children), absoluteStart, absoluteEnd or (globalStart + startTagEnd - 1)
             end
         end
     end
