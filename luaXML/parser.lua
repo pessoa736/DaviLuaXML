@@ -147,6 +147,11 @@ local function parseElement(code, globalStart)
         return nil, "Tag de abertura inválida"
     end
 
+    -- ignorar tags reservadas do Lua (<const>, <close>) usadas em atributos / sintaxe
+    if name == "const" or name == "close" then
+        return nil, "Tag reservada Lua ignorada"
+    end
+
 
     -- nó base
     local node = {

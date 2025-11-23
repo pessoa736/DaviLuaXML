@@ -4,17 +4,31 @@ local fcst = require("luaXML.functionCallToStringTransformer")
 
 return function(file)
     local code = readFile(file)
-    local firstTagStart = code:find("<[%w_]+")
-    if not firstTagStart then
-        return code, "Nenhuma tag encontrada"
+    local pos = 1
+    local element, relStart, relEnd, firstTagStart
+    while true do
+        local s, e, tagName = code:find("<([%w_]+)", pos)
+        if not s then
+            return nil, "Nenhuma tag válida encontrada"
+        end
+        -- se for reservado (<const>, <close>) e vier imediatamente '>' então ignorar
+        local gtPos = code:find(">", e + 1)
+        local immediateClose = (gtPos == e + 1)
+        if (tagName == "const" or tagName == "close") and immediateClose then
+            pos = e + 1
+        else
+            local candidate = code:sub(s)
+            local candElement, rs, re = parser(candidate)
+            if candElement then
+                element, relStart, relEnd, firstTagStart = candElement, rs, re, s
+                break
+            else
+                pos = e + 1
+            end
+        end
     end
 
-    local element, relStart, relEnd = parser(code:sub(firstTagStart))
-    if not element then
-        return nil, relStart
-    end
-
-    -- localizar toda a tag (auto-fechada ou com fechamento) para substituição
+    -- localizar abertura real
     local openStart, openEnd, tagName, attrs, selfClosed = code:find("<([%w_]+)%s*(.-)(/?)>", firstTagStart)
     if not openStart then
         return nil, "Falha ao localizar abertura da tag"
@@ -33,7 +47,6 @@ return function(file)
     local callStr = fcst(element)
     local transformed = code:sub(1, openStart - 1) .. callStr .. code:sub(tagEnd + 1)
 
-    -- executar código transformado
     local chunk, loadErr = load(transformed, file)
     if not chunk then
         return nil, "Erro ao compilar código transformado: " .. tostring(loadErr)

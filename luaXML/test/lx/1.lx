@@ -1,7 +1,7 @@
 
 
 function test(props, children)
-    local x = props.x
+    local x <const> = props.x
     return x + 1
 end
 
