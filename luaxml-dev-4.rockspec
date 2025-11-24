@@ -18,6 +18,9 @@ build = {
    modules = {
       ["luaXML.core"] = "luaXML/core.lua",
       ["luaXML.init"] = "luaXML/init.lua",
-      ["luaXML.props"] = "luaXML/props.lua"
+      ["luaXML.props"] = "luaXML/props.lua",
+      ["luaXML.readFile"] = "luaXML/readFile.lua",
+      ["luaXML.props"] = "luaXML/props.lua",
+      ["luaXML.parser"] = "luaXML/parser.lua",
    }
 }
