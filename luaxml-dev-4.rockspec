@@ -1,5 +1,5 @@
 package = "luaXML"
-version = "dev-3"
+version = "dev-4"
 source = {
    url = "git+https://github.com/pessoa736/luaXML"
 }
