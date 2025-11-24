@@ -1,5 +1,5 @@
 package = "luaXML"
-version = "dev-5"
+version = "dev-6"
 source = {
    url = "git+https://github.com/pessoa736/luaXML"
 }
@@ -21,6 +21,6 @@ build = {
       ["luaXML.parser"] = "luaXML/parser.lua",
       ["luaXML.props"] = "luaXML/props.lua",
       ["luaXML.readFile"] = "luaXML/readFile.lua",
-      ["luaXML.transform"] = "luaXML/transform",
+      ["luaXML.transform"] = "luaXML/transform"
    }
 }
