@@ -1,5 +1,5 @@
 package = "luaXML"
-version = "dev-7"
+version = "dev-8"
 source = {
    url = "git+https://github.com/pessoa736/luaXML"
 }
@@ -17,13 +17,13 @@ build = {
    type = "builtin",
    modules = {
       ["luaXML.core"] = "luaXML/core.lua",
+      ["luaXML.elements"] = "luaXML/elements.lua",
+      ["luaXML.functionCallToStringTransformer"] = "luaXML/functionCallToStringTransformer.lua",
       ["luaXML.init"] = "luaXML/init.lua",
       ["luaXML.parser"] = "luaXML/parser.lua",
       ["luaXML.props"] = "luaXML/props.lua",
       ["luaXML.readFile"] = "luaXML/readFile.lua",
-      ["luaXML.transform"] = "luaXML/transform.lua",
-      ["luaXML.elements"] = "luaXML/elements.lua",
       ["luaXML.tableToString"] = "luaXML/tableToString.lua",
-      ["luaXML.functionCallToStringTransformer"] = "luaXML/functionCallToStringTransformer.lua"
+      ["luaXML.transform"] = "luaXML/transform.lua"
    }
 }
