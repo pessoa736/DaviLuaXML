@@ -8,6 +8,10 @@ local function repeatTab(n)
   return str
 end
 
+--- Converte uma tabela Lua em string formatada (pretty print).
+--- @param s table Tabela a ser convertida
+--- @param n number|false|nil Nível de indentação (false = sem formatação, nil = 0)
+--- @return string Representação da tabela como string
 local function _tostring(s, n)
     local usetabs = function(_) if n == false then return "" else return repeatTab(_) end end
     local useBreakLine = function() if n == false then return "" else return "\n" end end
