@@ -1,21 +1,25 @@
 local M = {}
 
+local insert = table.insert
+local concat = table.concat
+local format = table.format
+
 function M.tableToPropsString(props)
     if not props then return "" end
     local parts = {}
     for k, v in pairs(props) do
         local t = type(v)
         if t == "string" then
-            table.insert(parts, string.format('%s="%s"', k, v))
+            insert(parts, format('%s="%s"', k, v))
         elseif t == "number" then
-            table.insert(parts, string.format('%s="%s"', k, tostring(v)))
+            insert(parts, format('%s="%s"', k, tostring(v)))
         elseif t == "boolean" then
-            table.insert(parts, string.format('%s="%s"', k, v and "true" or "false"))
+            insert(parts, format('%s="%s"', k, v and "true" or "false"))
         elseif t == "table" then
-            table.insert(parts, string.format('%s="%s"', k, tostring(v)))
+            insert(parts, format('%s="%s"', k, tostring(v)))
         end
     end
-    return table.concat(parts, " ")
+    return concat(parts, " ")
 end
 
 function M.stringToPropsTable(str)

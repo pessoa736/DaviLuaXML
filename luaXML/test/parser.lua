@@ -4,6 +4,7 @@ local test = [[
   <test pr=t>
     <test/>
     <test/>
+    <html.a href="linkMuitoLegal.com" />
   </test>
 ]]
 
