@@ -64,7 +64,7 @@ rockspecs/            # Especificações do LuaRocks
 2. Commit das mudanças
 3. Criar tag git: `git tag X.Y-Z`
 4. Push com tags: `git push && git push --tags`
-5. Upload no LuaRocks: `luarocks upload rockspecs/daviluaxml-X.Y-Z.rockspec --api-key=CHAVE`
+5. Upload no LuaRocks: `luarocks upload rockspecs/daviluaxml-X.Y-Z.rockspec`
 
 ## Padrões de Código
 
@@ -81,6 +81,13 @@ end
 ```
 
 ### Uso de log:
+
+**IMPORTANTE:** Antes de usar qualquer função do loglua, consulte `log.help()` no terminal Lua para ver todas as funções disponíveis e como usá-las:
+```lua
+require("loglua").help()
+```
+
+Uso básico:
 ```lua
 if not _G.log then _G.log = require("loglua") end
 local logDebug = _G.log.inSection("XMLRuntime")
