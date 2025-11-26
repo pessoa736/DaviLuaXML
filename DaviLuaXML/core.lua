@@ -30,8 +30,8 @@ local readFile = require("DaviLuaXML.readFile")
 local transform = require("DaviLuaXML.transform").transform
 local errors = require("DaviLuaXML.errors")
 
-_G.log = _G.log or require("loglua")
-local logDebug = log.inSection("XMLRuntime")
+if not _G.log then _G.log = require("loglua") end
+local logDebug = _G.log.inSection("XMLRuntime")
 
 --- Carrega, transforma e executa um arquivo .lx.
 ---
