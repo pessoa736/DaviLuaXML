@@ -33,6 +33,7 @@ Or install from VSIX:
 code --install-extension daviluaxml-0.1.0.vsix
 ```
 
+
 ## Usage
 
 Simply open any `.lx` file and the extension will automatically activate.
@@ -41,6 +42,25 @@ To format a document:
 
 - Use `Shift+Alt+F` (or `Shift+Option+F` on Mac)
 - Or right-click and select "Format Document"
+
+### Enable Lua Language Server for .lx
+
+To get Lua autocompletion and diagnostics in `.lx` files, add this to your VS Code `settings.json`:
+
+```json
+"Lua.file.associations": ["*.lx", "*.lua"]
+```
+
+Or, for sumneko/lua (Lua Language Server):
+
+```json
+"Lua.workspace.library": [
+  "${workspaceFolder}"
+],
+"Lua.runtime.fileExtension": ["lua", "lx"]
+```
+
+This will enable Lua suggestions and diagnostics in `.lx` files.
 
 ## Settings
 

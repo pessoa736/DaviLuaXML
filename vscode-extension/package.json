@@ -45,6 +45,25 @@
         "path": "./syntaxes/luaxml.tmLanguage.json"
       }
     ],
+    "snippets": [
+      {
+        "language": "luaxml",
+        "path": "./snippets/luaxml.code-snippets"
+      },
+      {
+        "language": "lua",
+        "path": "./snippets/luaxml.code-snippets"
+      },
+      {
+        "language": "xml",
+        "path": "./snippets/luaxml.code-snippets"
+      }
+    ],
+    "extensionPack": [
+      "sumneko.lua",
+      "Koihik.LuaFormatter",
+      "CoenraadS.bracket-pair-colorizer-2"
+    ],
     "commands": [
       {
         "command": "daviluaxml.formatDocument",
