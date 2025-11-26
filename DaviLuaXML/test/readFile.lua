@@ -3,7 +3,7 @@
     
     O módulo readFile lê o conteúdo de um arquivo e retorna como string.
 ]]
-
+---@diagnostic disable: need-check-nil
 
 _G.log = _G.log or require("loglua")
 local logTest = log.inSection("tests")

@@ -1,6 +1,7 @@
 --[[
     Testes do módulo transform.lua
 ]]
+---@diagnostic disable: need-check-nil
 
 local transform = require("DaviLuaXML.transform").transform
 _G.log = _G.log or require("loglua")

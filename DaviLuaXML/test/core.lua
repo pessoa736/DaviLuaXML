@@ -1,7 +1,7 @@
 --[[
     Testes do módulo core.lua
 ]]
-
+---@diagnostic disable: need-check-nil, undefined-field
 
 _G.log = _G.log or require("loglua")
 local logTest = log.inSection("tests")
