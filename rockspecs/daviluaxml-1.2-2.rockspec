@@ -1,8 +1,8 @@
 package = "DaviLuaXML"
-version = "1.2-1"
+version = "1.2-2"
 source = {
    url = "git+https://github.com/pessoa736/DaviLuaXML",
-   tag = "1.2-1"
+   tag = "1.2-2"
 }
 description = {
    summary = "XML syntax support for Lua - write XML directly in your Lua code",
@@ -15,11 +15,9 @@ description = {
       It also includes fixes to ensure local workspace modules are preferred during
       development and testing.
 
-      Changes in 1.2-1:
-      - Added `DaviLuaXML.middleware` module (runtime middleware for props/children)
-      - Added `DaviLuaXML.fcst_core` module (clean function-call serializer)
-      - Integrated middleware into the transform flow
-      - Tests adjusted to use local modules during development
+      Changes in 1.2-2:
+      - Fixed packaging to include `fcst_core`
+      - Minor serialization fixes and middleware integration bug fixes
    ]],
    homepage = "https://github.com/pessoa736/DaviLuaXML",
    license = "MIT"
@@ -36,7 +34,6 @@ build = {
       ["DaviLuaXML.elements"] = "DaviLuaXML/elements.lua",
       ["DaviLuaXML.errors"] = "DaviLuaXML/errors.lua",
       ["DaviLuaXML.functionCallToStringTransformer"] = "DaviLuaXML/functionCallToStringTransformer.lua",
-      ["DaviLuaXML.fcst_core"] = "DaviLuaXML/fcst_core.lua",
       ["DaviLuaXML.middleware"] = "DaviLuaXML/middleware.lua",
       ["DaviLuaXML.help"] = "DaviLuaXML/help.lua",
       ["DaviLuaXML.init"] = "DaviLuaXML/init.lua",
