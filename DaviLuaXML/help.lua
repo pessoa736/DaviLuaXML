@@ -75,6 +75,7 @@ Use help("topic") for more information:
     - transform  - Transformation module
     - elements   - Element creation
     - props      - Property handling
+    - middleware - Middleware system for props/children
     - errors     - Error system
     - core       - File loading
     - init       - Require system
@@ -449,6 +450,76 @@ NOTES:
     - The loaded module stays in package.loaded normally
 ]=]
 
+help.en.middleware = [=[
+======================================================================
+                       DaviLuaXML - Middleware                            
+======================================================================
+
+The middleware module allows transforming props and children values
+before they are serialized into function calls.
+
+USAGE:
+------
+    local middleware = require("DaviLuaXML.middleware")
+    
+    -- Register a middleware for props
+    middleware.addProp(function(value, ctx)
+        -- transform and return new value
+        return value
+    end)
+    
+    -- Register a middleware for children
+    middleware.addChild(function(value, ctx)
+        -- transform and return new value
+        return value
+    end)
+
+CONTEXT (ctx):
+--------------
+    For props:
+        ctx.key   - Property name
+        ctx.tag   - Tag name of the element
+        ctx.props - All props of the element
+    
+    For children:
+        ctx.index  - Child index (1-based)
+        ctx.tag    - Tag name of the element
+        ctx.parent - Parent element
+
+FUNCTIONS:
+----------
+    addProp(fn)         - Register prop middleware
+    addChild(fn)        - Register child middleware
+    runProp(value, ctx) - Execute prop middlewares (internal)
+    runChild(value, ctx)- Execute child middlewares (internal)
+
+EXAMPLE:
+--------
+    local middleware = require("DaviLuaXML.middleware")
+    
+    -- Log all props during transformation
+    middleware.addProp(function(value, ctx)
+        print(string.format("Prop %s = %s in <%s>", 
+            ctx.key, tostring(value), ctx.tag))
+        return value  -- return unchanged
+    end)
+    
+    -- Convert all string children to uppercase
+    middleware.addChild(function(value, ctx)
+        if type(value) == "string" then
+            return value:upper()
+        end
+        return value
+    end)
+
+NOTES:
+------
+    - Middlewares are executed in registration order
+    - If a middleware returns nil, the value is unchanged
+    - Errors in middlewares are caught (pcall) and ignored
+    - Middlewares run at transformation time, not runtime
+]=]
+
 --------------------------------------------------------------------------------
 -- TEXTOS DE AJUDA - PORTUGUES
 --------------------------------------------------------------------------------
@@ -492,6 +563,7 @@ Use help("topico") para mais informacoes:
     - transform  - Modulo de transformacao
     - elements   - Criacao de elementos
     - props      - Manipulacao de propriedades
+    - middleware - Sistema de middleware para props/children
     - errors     - Sistema de erros
     - core       - Carregamento de arquivos
     - init       - Sistema de require
@@ -866,6 +938,76 @@ NOTAS:
     - O modulo carregado fica em package.loaded normalmente
 ]=]
 
+help.pt.middleware = [=[
+======================================================================
+                       DaviLuaXML - Middleware                            
+======================================================================
+
+O modulo middleware permite transformar valores de props e children
+antes de serem serializados em chamadas de funcao.
+
+USO:
+----
+    local middleware = require("DaviLuaXML.middleware")
+    
+    -- Registrar um middleware para props
+    middleware.addProp(function(value, ctx)
+        -- transformar e retornar novo valor
+        return value
+    end)
+    
+    -- Registrar um middleware para children
+    middleware.addChild(function(value, ctx)
+        -- transformar e retornar novo valor
+        return value
+    end)
+
+CONTEXTO (ctx):
+---------------
+    Para props:
+        ctx.key   - Nome da propriedade
+        ctx.tag   - Nome da tag do elemento
+        ctx.props - Todas as props do elemento
+    
+    Para children:
+        ctx.index  - Indice do filho (comeca em 1)
+        ctx.tag    - Nome da tag do elemento
+        ctx.parent - Elemento pai
+
+FUNCOES:
+--------
+    addProp(fn)         - Registrar middleware de prop
+    addChild(fn)        - Registrar middleware de child
+    runProp(value, ctx) - Executar middlewares de prop (interno)
+    runChild(value, ctx)- Executar middlewares de child (interno)
+
+EXEMPLO:
+--------
+    local middleware = require("DaviLuaXML.middleware")
+    
+    -- Logar todas as props durante a transformacao
+    middleware.addProp(function(value, ctx)
+        print(string.format("Prop %s = %s em <%s>", 
+            ctx.key, tostring(value), ctx.tag))
+        return value  -- retorna sem alteracao
+    end)
+    
+    -- Converter todos os children string para maiusculo
+    middleware.addChild(function(value, ctx)
+        if type(value) == "string" then
+            return value:upper()
+        end
+        return value
+    end)
+
+NOTAS:
+------
+    - Middlewares sao executados na ordem de registro
+    - Se um middleware retornar nil, o valor nao e alterado
+    - Erros em middlewares sao capturados (pcall) e ignorados
+    - Middlewares rodam no momento da transformacao, nao em runtime
+]=]
+
 --------------------------------------------------------------------------------
 -- TEXTOS DE AJUDA - ESPANOL
 --------------------------------------------------------------------------------
@@ -909,6 +1051,7 @@ Usa help("tema") para mas informacion:
     - transform  - Modulo de transformacion
     - elements   - Creacion de elementos
     - props      - Manejo de propiedades
+    - middleware - Sistema de middleware para props/children
     - errors     - Sistema de errores
     - core       - Carga de archivos
     - init       - Sistema de require
@@ -1281,6 +1424,76 @@ NOTAS:
     - El searcher usa package.path reemplazando .lua por .lx
     - Funciona con rutas con punto (a.b.c se convierte en a/b/c.lx)
     - El modulo cargado queda en package.loaded normalmente
+]=]
+
+help.es.middleware = [=[
+======================================================================
+                       DaviLuaXML - Middleware                            
+======================================================================
+
+El modulo middleware permite transformar valores de props y children
+antes de ser serializados en llamadas de funcion.
+
+USO:
+----
+    local middleware = require("DaviLuaXML.middleware")
+    
+    -- Registrar un middleware para props
+    middleware.addProp(function(value, ctx)
+        -- transformar y retornar nuevo valor
+        return value
+    end)
+    
+    -- Registrar un middleware para children
+    middleware.addChild(function(value, ctx)
+        -- transformar y retornar nuevo valor
+        return value
+    end)
+
+CONTEXTO (ctx):
+---------------
+    Para props:
+        ctx.key   - Nombre de la propiedad
+        ctx.tag   - Nombre de la etiqueta del elemento
+        ctx.props - Todas las props del elemento
+    
+    Para children:
+        ctx.index  - Indice del hijo (comienza en 1)
+        ctx.tag    - Nombre de la etiqueta del elemento
+        ctx.parent - Elemento padre
+
+FUNCIONES:
+----------
+    addProp(fn)         - Registrar middleware de prop
+    addChild(fn)        - Registrar middleware de child
+    runProp(value, ctx) - Ejecutar middlewares de prop (interno)
+    runChild(value, ctx)- Ejecutar middlewares de child (interno)
+
+EJEMPLO:
+--------
+    local middleware = require("DaviLuaXML.middleware")
+    
+    -- Registrar todas las props durante la transformacion
+    middleware.addProp(function(value, ctx)
+        print(string.format("Prop %s = %s en <%s>", 
+            ctx.key, tostring(value), ctx.tag))
+        return value  -- retorna sin cambios
+    end)
+    
+    -- Convertir todos los children string a mayusculas
+    middleware.addChild(function(value, ctx)
+        if type(value) == "string" then
+            return value:upper()
+        end
+        return value
+    end)
+
+NOTAS:
+------
+    - Los middlewares se ejecutan en orden de registro
+    - Si un middleware retorna nil, el valor no se altera
+    - Errores en middlewares son capturados (pcall) e ignorados
+    - Los middlewares se ejecutan en el momento de la transformacion, no en runtime
 ]=]
 
 --------------------------------------------------------------------------------
