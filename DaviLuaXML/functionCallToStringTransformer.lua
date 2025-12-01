@@ -1,12 +1,29 @@
 
 local middleware = require("DaviLuaXML.middleware")
 
+--- Serializa uma string de forma segura para Lua.
+--- Usa [[ ]] para strings multilinha, aspas simples para strings simples.
+local function serializeString(s)
+    s = tostring(s)
+    if s:find("\n") then
+        -- String multilinha: usar [[ ]] com nível adequado
+        local level = 0
+        while s:find("%]" .. string.rep("=", level) .. "%]") do
+            level = level + 1
+        end
+        local eq = string.rep("=", level)
+        return "[" .. eq .. "[" .. s .. "]" .. eq .. "]"
+    else
+        -- String simples: usar aspas simples com escape
+        return "'" .. s:gsub("\\", "\\\\"):gsub("'", "\\'") .. "'"
+    end
+end
+
 local function serializePropValue(v)
     if type(v) == "table" and v.__luaexpr then
         return v.code
     elseif type(v) == "string" then
-        local s = tostring(v):gsub("'", "\\'")
-        return "'" .. s .. "'"
+        return serializeString(v)
     elseif type(v) == "number" or type(v) == "boolean" then
         return tostring(v)
     elseif type(v) == "table" then
@@ -29,8 +46,7 @@ local function serializeChild(ch)
     elseif type(ch) == "table" and ch.tag then
         return fcst(ch)
     elseif type(ch) == "string" then
-        local s = tostring(ch):gsub("'", "\\'")
-        return "'" .. s .. "'"
+        return serializeString(ch)
     else
         return tostring(ch)
     end
