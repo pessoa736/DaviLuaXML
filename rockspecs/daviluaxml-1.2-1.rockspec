@@ -11,13 +11,12 @@ description = {
       XML tags are transformed into Lua function calls, similar to JSX in JavaScript.
       
       This release adds a middleware system for transforming `props` and `children`
-      at transformation time and splits the function-call serializer to `fcst_core`.
-      It also includes fixes to ensure local workspace modules are preferred during
-      development and testing.
+      at transformation time. It also includes fixes to ensure local workspace modules
+      are preferred during development and testing.
 
-      Changes in 1.2-2:
-      - Fixed packaging to include `fcst_core`
-      - Minor serialization fixes and middleware integration bug fixes
+      Changes in 1.2-1:
+      - Added `DaviLuaXML.middleware` module for props/children transformation
+      - Minor serialization fixes and middleware integration
    ]],
    homepage = "https://github.com/pessoa736/DaviLuaXML",
    license = "MIT"

@@ -45,19 +45,12 @@ local parser = require("DaviLuaXML.parser")
 -- por fim usa o `require` (caso esteja instalado globalmente).
 local fcst
 do
-  local candidates = {
-    "DaviLuaXML/fcst_core.lua",
-    "DaviLuaXML/functionCallToStringTransformer.lua",
-  }
-  for _, local_path in ipairs(candidates) do
-    local f = io.open(local_path, "r")
-    if f then
-      f:close()
-      fcst = assert(dofile(local_path))
-      break
-    end
-  end
-  if not fcst then
+  local local_path = "DaviLuaXML/functionCallToStringTransformer.lua"
+  local f = io.open(local_path, "r")
+  if f then
+    f:close()
+    fcst = assert(dofile(local_path))
+  else
     fcst = require("DaviLuaXML.functionCallToStringTransformer")
   end
 end
