@@ -1,5 +1,7 @@
 print("inicio do test")
 
+
+
 local function soma(props, childrens)
     local soma = 0 
     for _, valor in ipairs(childrens) do

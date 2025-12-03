@@ -1,9 +1,10 @@
 {
   "name": "daviluaxml",
   "displayName": "DaviLuaXML",
-  "description": "Syntax highlighting and formatting for .lx files (Lua with XML/JSX-like syntax)",
-  "version": "0.1.0",
+  "description": "Syntax highlighting, IntelliSense and formatting for .lx files (Lua with XML/JSX-like syntax)",
+  "version": "0.2.0",
   "publisher": "pessoa736",
+  "icon": "icon.png",
   "repository": {
     "type": "git",
     "url": "https://github.com/pessoa736/DaviLuaXML"
@@ -13,14 +14,19 @@
   },
   "categories": [
     "Programming Languages",
-    "Formatters"
+    "Formatters",
+    "Snippets"
   ],
   "keywords": [
     "lua",
     "xml",
     "jsx",
     "lx",
-    "daviluaxml"
+    "daviluaxml",
+    "syntax highlighting"
+  ],
+  "activationEvents": [
+    "onLanguage:luaxml"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -35,39 +41,37 @@
         "extensions": [
           ".lx"
         ],
-        "configuration": "./language-configuration.json"
+        "configuration": "./language-configuration.json",
+        "icon": {
+          "light": "./icons/lx-light.png",
+          "dark": "./icons/lx-dark.png"
+        }
       }
     ],
     "grammars": [
       {
         "language": "luaxml",
         "scopeName": "source.luaxml",
-        "path": "./syntaxes/luaxml.tmLanguage.json"
+        "path": "./syntaxes/luaxml.tmLanguage.json",
+        "embeddedLanguages": {
+          "source.lua.embedded": "lua"
+        }
       }
     ],
     "snippets": [
       {
         "language": "luaxml",
         "path": "./snippets/luaxml.code-snippets"
-      },
-      {
-        "language": "lua",
-        "path": "./snippets/luaxml.code-snippets"
-      },
-      {
-        "language": "xml",
-        "path": "./snippets/luaxml.code-snippets"
       }
-    ],
-    "extensionPack": [
-      "sumneko.lua",
-      "Koihik.LuaFormatter",
-      "CoenraadS.bracket-pair-colorizer-2"
     ],
     "commands": [
       {
         "command": "daviluaxml.formatDocument",
         "title": "Format LuaXML Document"
+      },
+      {
+        "command": "daviluaxml.showTags",
+        "title": "DaviLuaXML: Show All Tags in File"
       }
     ],
     "configuration": {
@@ -82,6 +86,16 @@
           "type": "boolean",
           "default": false,
           "description": "Use tabs instead of spaces"
+        },
+        "daviluaxml.enableTagSuggestions": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable XML tag suggestions based on defined functions"
+        },
+        "daviluaxml.enableVariableSuggestions": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable Lua variable suggestions"
         }
       }
     }
@@ -90,7 +104,8 @@
     "vscode:prepublish": "npm run compile",
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
-    "lint": "eslint src --ext ts"
+    "lint": "eslint src --ext ts",
+    "package": "vsce package"
   },
   "devDependencies": {
     "@types/node": "^20.10.0",
@@ -98,6 +113,7 @@
     "@typescript-eslint/eslint-plugin": "^6.13.0",
     "@typescript-eslint/parser": "^6.13.0",
     "eslint": "^8.54.0",
-    "typescript": "^5.3.0"
+    "typescript": "^5.3.0",
+    "@vscode/vsce": "^2.22.0"
   }
 }
