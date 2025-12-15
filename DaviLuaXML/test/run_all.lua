@@ -39,6 +39,8 @@ local testFiles = {
     "transform",
     "fcst",
     "readFile",
+    "cache",
+    "compile",
     "core",
     "init",
     "help",

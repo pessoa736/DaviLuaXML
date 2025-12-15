@@ -36,6 +36,7 @@
 local readFile = require("DaviLuaXML.readFile")
 local transform = require("DaviLuaXML.transform").transform
 local errors = require("DaviLuaXML.errors")
+local cache = require("DaviLuaXML.cache")
 
 if not _G.log then _G.log = require("loglua") end
 local logDebug = _G.log.inSection("XMLRuntime")
@@ -83,15 +84,25 @@ local function lx_searcher(modname)
 	
 	logDebug("[searcher] Arquivo encontrado:", filename)
 	
-	-- Ler, transformar e compilar
+	-- Ler arquivo
 	local code = readFile(filename)
 	logDebug("[searcher] Código lido, tamanho:", #code, "bytes")
 	
-	local transformed, transformErr = transform(code, filename)
+	-- Tentar obter do cache
+	local transformed = cache.get(filename, code)
 	
-	if transformErr or not transformed then
-		logDebug("[searcher] ERRO na transformação:", transformErr)
-		error(transformErr, 0)
+	if not transformed then
+		-- Transformar e salvar no cache
+		local transformErr
+		transformed, transformErr = transform(code, filename)
+		
+		if transformErr or not transformed then
+			logDebug("[searcher] ERRO na transformação:", transformErr)
+			error(transformErr, 0)
+		end
+		
+		-- Salvar no cache para próxima vez
+		cache.set(filename, code, transformed)
 	end
 	
 	local chunk, err = load(transformed, "@"..filename)
