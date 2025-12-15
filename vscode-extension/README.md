@@ -15,6 +15,11 @@ Syntax highlighting and formatting support for `.dslx` files (DSLX - Lua with XM
   - Lua control structures (`if`, `function`, `for`, etc.)
   - XML tags (opening/closing)
 
+- 🧠 **Autocomplete (no native LSP required)**
+  - Suggests tags/components found in your current file
+  - Suggests tags/components found across the whole workspace (indexing `.lua` and `.dslx`)
+  - Suggests XML attributes from `propTypes` tables when available (e.g. `proptypes.register("MyTag", { ... })`)
+
 - ⚙️ **Language Configuration**:
   - Auto-closing brackets and tags
   - Comment toggling (`--` and `--[[ ]]`)
@@ -30,7 +35,7 @@ Syntax highlighting and formatting support for `.dslx` files (DSLX - Lua with XM
 Or install from VSIX:
 
 ```bash
-code --install-extension daviluaxml-0.1.0.vsix
+code --install-extension daviluaxml-0.2.0.vsix
 ```
 
 
@@ -45,22 +50,24 @@ To format a document:
 
 ### Enable Lua Language Server for .dslx
 
-To get Lua autocompletion and diagnostics in `.dslx` files, add this to your VS Code `settings.json`:
+Optional: to get Lua diagnostics and richer Lua-aware IntelliSense inside `.dslx`, you can associate the files with your Lua extension/LSP.
+
+For Lua Language Server (sumneko/lua), add this to your VS Code `settings.json`:
 
 ```json
 "Lua.file.associations": ["*.dslx", "*.lua"]
 ```
 
-Or, for sumneko/lua (Lua Language Server):
+If you use a workspace library:
 
 ```json
 "Lua.workspace.library": [
   "${workspaceFolder}"
 ],
-"Lua.runtime.fileExtension": ["lua", "lx"]
+"Lua.runtime.fileExtension": ["lua", "dslx"]
 ```
 
-This will enable Lua suggestions and diagnostics in `.dslx` files.
+This is optional; the extension already provides tag + attribute completions without an LSP.
 
 ## Settings
 
@@ -68,6 +75,8 @@ This will enable Lua suggestions and diagnostics in `.dslx` files.
 |---------|---------|-------------|
 | `daviluaxml.indentSize` | `2` | Number of spaces for indentation |
 | `daviluaxml.useTabs` | `false` | Use tabs instead of spaces |
+| `daviluaxml.enableTagSuggestions` | `true` | Enable tag/component suggestions (workspace indexing) |
+| `daviluaxml.enableVariableSuggestions` | `true` | Enable Lua variable suggestions |
 
 ## License
 

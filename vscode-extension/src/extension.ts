@@ -10,6 +10,26 @@ const LUA_FOR_PATTERN = /for\s+(\w+)\s*(?:,\s*(\w+))?\s*(?:=|in)/g;
 const XML_TAG_PATTERN = /<(\w+(?:\.\w+)?)\s*[^>]*>/g;
 const LUA_REQUIRE_PATTERN = /(?:local\s+)?(\w+)\s*=\s*require\s*\(\s*["']([^"']+)["']\s*\)/g;
 
+type TagSource = 'document' | 'required-module' | 'workspace';
+
+interface TagInfo {
+    name: string;
+    source: TagSource;
+    detail?: string;
+}
+
+interface TagPropsInfo {
+    props: Set<string>;
+    source: string;
+}
+
+// Cache para indexação do workspace (tags e propTypes)
+let workspaceTagsCache: Map<string, TagInfo> = new Map();
+let workspacePropTypesCache: Map<string, TagPropsInfo> = new Map();
+let workspaceIndexingPromise: Promise<void> | null = null;
+let workspaceIndexLastUpdate: number = 0;
+const WORKSPACE_INDEX_TTL = 30000; // 30s
+
 // Cache para pacotes LuaRocks
 let luarocksPackagesCache: Map<string, LuaRocksPackage> = new Map();
 let luarocksLastUpdate: number = 0;
@@ -28,6 +48,199 @@ interface ModuleExports {
     functions: Map<string, { params?: string[]; description?: string }>;
     variables: Map<string, { type?: string }>;
     tags: Set<string>;
+}
+
+function getConfig<T>(key: string, defaultValue: T): T {
+    return vscode.workspace.getConfiguration('daviluaxml').get<T>(key, defaultValue);
+}
+
+function decodeBufferToString(buffer: Uint8Array): string {
+    return Buffer.from(buffer).toString('utf8');
+}
+
+function matchBalancedBraces(text: string, openBraceIndex: number): { start: number; end: number } | null {
+    // Muito simples (não é um parser Lua completo). Faz o balanceamento de { } ignorando strings curtas.
+    let i = openBraceIndex;
+    if (text[i] !== '{') return null;
+
+    let depth = 0;
+    let inSingle = false;
+    let inDouble = false;
+    let inLongBracket = false;
+
+    for (; i < text.length; i++) {
+        const ch = text[i];
+        const next = text[i + 1];
+
+        if (!inSingle && !inDouble) {
+            // long bracket [[ ... ]]
+            if (!inLongBracket && ch === '[' && next === '[') {
+                inLongBracket = true;
+                i++;
+                continue;
+            }
+            if (inLongBracket && ch === ']' && next === ']') {
+                inLongBracket = false;
+                i++;
+                continue;
+            }
+        }
+
+        if (inLongBracket) {
+            continue;
+        }
+
+        // strings simples
+        if (!inDouble && ch === "'" && text[i - 1] !== '\\') {
+            inSingle = !inSingle;
+            continue;
+        }
+        if (!inSingle && ch === '"' && text[i - 1] !== '\\') {
+            inDouble = !inDouble;
+            continue;
+        }
+        if (inSingle || inDouble) {
+            continue;
+        }
+
+        if (ch === '{') depth++;
+        if (ch === '}') {
+            depth--;
+            if (depth === 0) {
+                return { start: openBraceIndex, end: i };
+            }
+        }
+    }
+
+    return null;
+}
+
+function extractLuaTableKeys(tableText: string): Set<string> {
+    const keys = new Set<string>();
+
+    // identificador =
+    const identKey = /\b([A-Za-z_][\w_]*)\s*=/g;
+    let m: RegExpExecArray | null;
+    while ((m = identKey.exec(tableText)) !== null) {
+        keys.add(m[1]);
+    }
+
+    // ["key"] =
+    const bracketStringKey = /\[\s*["']([^"']+)["']\s*\]\s*=/g;
+    while ((m = bracketStringKey.exec(tableText)) !== null) {
+        keys.add(m[1]);
+    }
+
+    return keys;
+}
+
+function getTagNameAtPosition(linePrefix: string): { tagName: string | null; inTagName: boolean; inAttributes: boolean } {
+    // Estamos dentro de um tag? (não passou de '>')
+    const lastOpen = linePrefix.lastIndexOf('<');
+    const lastClose = linePrefix.lastIndexOf('>');
+    if (lastOpen === -1 || lastClose > lastOpen) {
+        return { tagName: null, inTagName: false, inAttributes: false };
+    }
+
+    const afterOpen = linePrefix.slice(lastOpen + 1);
+    // ignora fechamento </
+    const clean = afterOpen.startsWith('/') ? afterOpen.slice(1) : afterOpen;
+    const nameMatch = clean.match(/^([\w.]+)/);
+    const tagName = nameMatch ? nameMatch[1] : null;
+
+    if (!tagName) {
+        return { tagName: null, inTagName: true, inAttributes: false };
+    }
+
+    const afterName = clean.slice(tagName.length);
+    const inTagName = /^(?:\s*)$/.test(afterName);
+    const inAttributes = /\s/.test(afterName);
+    return { tagName, inTagName, inAttributes };
+}
+
+async function ensureWorkspaceIndex(): Promise<void> {
+    const enableTagSuggestions = getConfig('enableTagSuggestions', true);
+    if (!enableTagSuggestions) return;
+
+    const now = Date.now();
+    if (workspaceIndexingPromise) return workspaceIndexingPromise;
+    if (now - workspaceIndexLastUpdate < WORKSPACE_INDEX_TTL && workspaceTagsCache.size > 0) return;
+
+    workspaceIndexingPromise = (async () => {
+        const tags = new Map<string, TagInfo>();
+        const propTypes = new Map<string, TagPropsInfo>();
+
+        const include = '**/*.{lua,dslx}';
+        const exclude = '{**/node_modules/**,**/.git/**,**/lua_modules/**,**/.luarocks/**,**/dist/**,**/out/**}';
+        const files = await vscode.workspace.findFiles(include, exclude, 2000);
+
+        const proptypesRegisterPattern = /proptypes\s*\.\s*register\s*\(\s*["']([^"']+)["']\s*,\s*\{/g;
+        const dotPropTypesPattern = /\b([A-Za-z_][\w_]*(?:\.[A-Za-z_][\w_]*)*)\s*\.\s*propTypes\s*=\s*\{/g;
+        const componentFuncPattern = /(?:^|\n)\s*(?:local\s+)?function\s+([A-Za-z_][\w_]*(?:\.[A-Za-z_][\w_]*)*)\s*\([^)]*\)[\s\S]{0,2000}?\breturn\s*</g;
+        const componentAssignPattern = /(?:^|\n)\s*(?:local\s+)?([A-Za-z_][\w_]*(?:\.[A-Za-z_][\w_]*)*)\s*=\s*function\s*\([^)]*\)[\s\S]{0,2000}?\breturn\s*</g;
+
+        for (const uri of files) {
+            try {
+                const content = decodeBufferToString(await vscode.workspace.fs.readFile(uri));
+                const rel = vscode.workspace.asRelativePath(uri);
+
+                // Indexa componentes por heurística: função/assign que retorna tag
+                let m: RegExpExecArray | null;
+                while ((m = componentFuncPattern.exec(content)) !== null) {
+                    const name = m[1];
+                    if (!tags.has(name)) {
+                        tags.set(name, { name, source: 'workspace', detail: `Found in ${rel}` });
+                    }
+                }
+                componentAssignPattern.lastIndex = 0;
+                while ((m = componentAssignPattern.exec(content)) !== null) {
+                    const name = m[1];
+                    if (!tags.has(name)) {
+                        tags.set(name, { name, source: 'workspace', detail: `Found in ${rel}` });
+                    }
+                }
+
+                // proptypes.register("Name", { ... })
+                proptypesRegisterPattern.lastIndex = 0;
+                while ((m = proptypesRegisterPattern.exec(content)) !== null) {
+                    const compName = m[1];
+                    const braceIndex = content.indexOf('{', m.index + m[0].lastIndexOf('{'));
+                    const range = matchBalancedBraces(content, braceIndex);
+                    if (!range) continue;
+
+                    const tableText = content.slice(range.start, range.end + 1);
+                    const keys = extractLuaTableKeys(tableText);
+                    if (keys.size > 0) {
+                        propTypes.set(compName, { props: keys, source: `proptypes.register in ${rel}` });
+                    }
+                }
+
+                // Component.propTypes = { ... }
+                dotPropTypesPattern.lastIndex = 0;
+                while ((m = dotPropTypesPattern.exec(content)) !== null) {
+                    const compName = m[1];
+                    const braceIndex = content.indexOf('{', m.index + m[0].lastIndexOf('{'));
+                    const range = matchBalancedBraces(content, braceIndex);
+                    if (!range) continue;
+                    const tableText = content.slice(range.start, range.end + 1);
+                    const keys = extractLuaTableKeys(tableText);
+                    if (keys.size > 0) {
+                        propTypes.set(compName, { props: keys, source: `propTypes table in ${rel}` });
+                    }
+                }
+            } catch {
+                // Ignora arquivos com erro de leitura
+            }
+        }
+
+        workspaceTagsCache = tags;
+        workspacePropTypesCache = propTypes;
+        workspaceIndexLastUpdate = Date.now();
+    })().finally(() => {
+        workspaceIndexingPromise = null;
+    });
+
+    return workspaceIndexingPromise;
 }
 
 // Tags XML comuns para sugestões
@@ -308,11 +521,18 @@ class LuaXMLCompletionProvider implements vscode.CompletionItemProvider {
         const symbols = analyzeDocument(document);
         const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath || '';
 
+        const enableTagSuggestions = getConfig('enableTagSuggestions', true);
+        const enableVariableSuggestions = getConfig('enableVariableSuggestions', true);
+
+        if (enableTagSuggestions) {
+            await ensureWorkspaceIndex();
+        }
+
         // Detectar se estamos dentro de require("")
         const inRequire = /require\s*\(\s*["'][^"']*$/.test(linePrefix);
 
         // Detectar se estamos dentro de uma tag XML (após <)
-        const inXmlTag = /<[\w.]*$/.test(linePrefix);
+        const inXmlTag = /<[\w.]*$/.test(linePrefix) || getTagNameAtPosition(linePrefix).tagName !== null;
         
         // Detectar se estamos após um ponto (acesso a método/propriedade)
         const dotMatch = linePrefix.match(/(\w+)\.\w*$/);
@@ -333,7 +553,7 @@ class LuaXMLCompletionProvider implements vscode.CompletionItemProvider {
                 for (const file of luaFiles) {
                     const relativePath = path.relative(workspaceRoot, file);
                     const moduleName = relativePath
-                        .replace(/\.(lua|lx)$/, '')
+                        .replace(/\.(lua|dslx)$/, '')
                         .replace(/\/init$/, '')
                         .replace(/\//g, '.');
                     
@@ -344,6 +564,25 @@ class LuaXMLCompletionProvider implements vscode.CompletionItemProvider {
                 }
             }
         } else if (inXmlTag) {
+            const tagCtx = getTagNameAtPosition(linePrefix);
+
+            // Se já temos nome do tag e estamos nos atributos, sugerir props/atributos
+            if (enableTagSuggestions && tagCtx.tagName && tagCtx.inAttributes) {
+                const exact = workspacePropTypesCache.get(tagCtx.tagName);
+                const fallback = tagCtx.tagName.includes('.') ? workspacePropTypesCache.get(tagCtx.tagName.split('.').pop()!) : undefined;
+                const propsInfo = exact || fallback;
+
+                if (propsInfo) {
+                    for (const propName of propsInfo.props) {
+                        const item = new vscode.CompletionItem(propName, vscode.CompletionItemKind.Property);
+                        item.detail = `propTypes (${propsInfo.source})`;
+                        item.insertText = new vscode.SnippetString(`${propName}="$1"`);
+                        item.sortText = '0' + propName;
+                        items.push(item);
+                    }
+                }
+            }
+
             // Sugerir tags XML
             // Tags usadas no documento
             for (const tag of symbols.tags) {
@@ -361,6 +600,19 @@ class LuaXMLCompletionProvider implements vscode.CompletionItemProvider {
                 item.insertText = new vscode.SnippetString(`${name} $1>$2</${name}>`);
                 item.sortText = '1' + name;
                 items.push(item);
+            }
+
+            // Tags/componentes do workspace (mesmo sem require explícito)
+            if (enableTagSuggestions) {
+                for (const [name, info] of workspaceTagsCache) {
+                    // evita duplicar o que já está no documento
+                    if (symbols.functions.has(name) || symbols.tags.has(name)) continue;
+                    const item = new vscode.CompletionItem(name, vscode.CompletionItemKind.Function);
+                    item.detail = info.detail || 'Workspace component';
+                    item.insertText = new vscode.SnippetString(`${name} $1>$2</${name}>`);
+                    item.sortText = '2' + name;
+                    items.push(item);
+                }
             }
 
             // Tags de módulos importados
@@ -442,12 +694,14 @@ class LuaXMLCompletionProvider implements vscode.CompletionItemProvider {
         } else {
             // Contexto Lua normal - sugerir variáveis, funções, builtins
 
-            // Variáveis do documento
-            for (const [name, info] of symbols.variables) {
-                const item = new vscode.CompletionItem(name, vscode.CompletionItemKind.Variable);
-                item.detail = `Local variable (line ${info.line + 1})`;
-                item.sortText = '0' + name;
-                items.push(item);
+            if (enableVariableSuggestions) {
+                // Variáveis do documento
+                for (const [name, info] of symbols.variables) {
+                    const item = new vscode.CompletionItem(name, vscode.CompletionItemKind.Variable);
+                    item.detail = `Local variable (line ${info.line + 1})`;
+                    item.sortText = '0' + name;
+                    items.push(item);
+                }
             }
 
             // Funções do documento
@@ -741,11 +995,24 @@ class LuaXMLSignatureHelpProvider implements vscode.SignatureHelpProvider {
 export function activate(context: vscode.ExtensionContext) {
     console.log('LuaXML extension is now active!');
 
+    // Atualiza index do workspace no background
+    ensureWorkspaceIndex();
+
+    const watcher = vscode.workspace.createFileSystemWatcher('**/*.{lua,dslx}');
+    const invalidateWorkspaceIndex = () => {
+        workspaceIndexLastUpdate = 0;
+        // Não limpa as caches imediatamente (evita flicker); só força rebuild na próxima sugestão.
+    };
+    watcher.onDidCreate(invalidateWorkspaceIndex);
+    watcher.onDidChange(invalidateWorkspaceIndex);
+    watcher.onDidDelete(invalidateWorkspaceIndex);
+    context.subscriptions.push(watcher);
+
     // Registrar providers
     const completionProvider = vscode.languages.registerCompletionItemProvider(
         { language: 'luaxml', scheme: 'file' },
         new LuaXMLCompletionProvider(),
-        '<', '.', ':', '"', "'"
+        '<', ' ', '.', ':', '"', "'", '='
     );
 
     const hoverProvider = vscode.languages.registerHoverProvider(
