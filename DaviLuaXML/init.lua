@@ -3,14 +3,14 @@
     ============
     
     Módulo principal do DaviLuaXML. Registra um searcher customizado no Lua
-    para permitir o uso de arquivos .lx (Lua + XML) com require().
+    para permitir o uso de arquivos .dslx (Lua + XML) com require().
     
     FUNCIONALIDADE:
     ---------------
     Ao carregar este módulo, ele adiciona um searcher em package.searchers
-    que intercepta chamadas require() e procura por arquivos .lx correspondentes.
+    que intercepta chamadas require() e procura por arquivos .dslx correspondentes.
     
-    Quando um arquivo .lx é encontrado:
+    Quando um arquivo .dslx é encontrado:
     1. Lê o conteúdo do arquivo
     2. Transforma as tags XML em chamadas de função Lua
     3. Compila e retorna o chunk resultante
@@ -20,12 +20,12 @@
     -- No início do programa principal:
     require("DaviLuaXML")
     
-    -- Agora você pode importar arquivos .lx normalmente:
-    local App = require("meu_componente")  -- carrega meu_componente.lx
+    -- Agora você pode importar arquivos .dslx normalmente:
+    local App = require("meu_componente")  -- carrega meu_componente.dslx
     
-    EXEMPLO DE ARQUIVO .lx:
+    EXEMPLO DE ARQUIVO .dslx:
     -----------------------
-    -- arquivo: componente.lx
+    -- arquivo: componente.dslx
     function Botao(props, children)
         return '<button class="' .. props.class .. '">' .. children[1] .. '</button>'
     end
@@ -63,22 +63,22 @@ end
 -- SEARCHER CUSTOMIZADO
 --------------------------------------------------------------------------------
 
---- Searcher para arquivos .lx (DaviLuaXML).
---- Procura arquivos .lx, transforma o código XML em Lua puro e retorna o chunk.
+--- Searcher para arquivos .dslx (DaviLuaXML).
+--- Procura arquivos .dslx, transforma o código XML em Lua puro e retorna o chunk.
 ---
 --- @param modname string Nome do módulo sendo carregado via require()
 --- @return function|string|nil Chunk compilado ou mensagem de erro
 --- @return string|nil Caminho do arquivo (se encontrado)
 local function lx_searcher(modname)
-	logDebug("[searcher] Procurando módulo .lx:", modname)
+	logDebug("[searcher] Procurando módulo .dslx:", modname)
 	
-	-- Gerar path para .lx baseado no package.path
-	local lxpath = (package.path or ""):gsub("%.lua", ".lx")
+	-- Gerar path para .dslx baseado no package.path
+	local lxpath = (package.path or ""):gsub("%.lua", ".dslx")
 	local filename = findfile(modname, lxpath)
 	
 	if not filename then
-		logDebug("[searcher] Módulo .lx não encontrado:", modname)
-		return "\n\tno .lx file found for " .. modname
+		logDebug("[searcher] Módulo .dslx não encontrado:", modname)
+		return "\n\tno .dslx file found for " .. modname
 	end
 	
 	logDebug("[searcher] Arquivo encontrado:", filename)

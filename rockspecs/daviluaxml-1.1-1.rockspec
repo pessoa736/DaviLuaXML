@@ -11,9 +11,9 @@ description = {
       XML tags are transformed into Lua function calls, similar to JSX in JavaScript.
       
       Features:
-      - Write XML directly in .lx files
+      - Write XML directly in .dslx files
       - Automatic transformation to Lua function calls
-      - Custom require() loader for .lx files
+      - Custom require() loader for .dslx files
       - Support for nested tags, expressions, and attributes
       - Multi-language help system (en, pt, es)
       - Debug logging with loglua (XMLRuntime section)

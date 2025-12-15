@@ -1,4 +1,4 @@
-# DaviLuaXML
+# Davi System Lua XML (DaviLuaXML)
 
 Sintaxis XML para Lua - escribe XML directamente en tu código Lua, similar a JSX en JavaScript.
 
@@ -15,17 +15,17 @@ luarocks install daviluaxml
 ## Uso Básico
 
 ```lua
--- Registrar el loader para archivos .lx
+-- Registrar el loader para archivos .dslx
 require("DaviLuaXML")
 
--- Ahora puedes usar require() con archivos .lx
+-- Ahora puedes usar require() con archivos .dslx
 local App = require("mi_componente")
 ```
 
-### Ejemplo de archivo .lx
+### Ejemplo de archivo .dslx
 
 ```lua
--- componente.lx
+-- componente.dslx
 local function Boton(props, children)
     return string.format('<button class="%s">%s</button>', 
         props.class, 
@@ -106,16 +106,16 @@ La función recibe dos argumentos:
 
 ### require("DaviLuaXML")
 
-Registra el loader para archivos `.lx`. Después de esto, `require()` funciona con archivos `.lx`.
+Registra el loader para archivos `.dslx`. Después de esto, `require()` funciona con archivos `.dslx`.
 
 ### require("DaviLuaXML.core")
 
 ```lua
 local lx = require("DaviLuaXML.core")
-local resultado, error = lx("archivo.lx")
+local resultado, error = lx("archivo.dslx")
 ```
 
-Ejecuta directamente un archivo `.lx` por su ruta.
+Ejecuta directamente un archivo `.dslx` por su ruta.
 
 ### require("DaviLuaXML.help")
 
@@ -144,7 +144,7 @@ log.show("XMLRuntime")
 | Módulo | Descripción |
 |--------|-------------|
 | `init` | Registra el searcher para require() |
-| `core` | Ejecuta archivos .lx directamente |
+| `core` | Ejecuta archivos .dslx directamente |
 | `parser` | Hace parsing de etiquetas XML |
 | `transform` | Transforma XML en Lua |
 | `elements` | Crea elementos (tablas) |

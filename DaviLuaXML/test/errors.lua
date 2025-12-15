@@ -35,22 +35,22 @@ logTest("   ✓ OK")
 
 -- Teste 4: format com arquivo
 logTest("4. Teste format com arquivo:")
-local msg2 = errors.format("erro de teste", nil, nil, "arquivo.lx")
+local msg2 = errors.format("erro de teste", nil, nil, "arquivo.dslx")
 logTest("   mensagem:", msg2)
-assert(msg2:find("arquivo.lx"), "deveria conter nome do arquivo")
+assert(msg2:find("arquivo.dslx"), "deveria conter nome do arquivo")
 logTest("   ✓ OK")
 
 -- Teste 5: format com posição
 logTest("5. Teste format com código e posição:")
 local codigo = "local x = <tag>\nconteudo\n</tag>"
-local msg3 = errors.format("tag inválida", codigo, 11, "teste.lx")
+local msg3 = errors.format("tag inválida", codigo, 11, "teste.dslx")
 logTest("   mensagem:", msg3)
 assert(msg3:find("linha"), "deveria conter 'linha'")
 logTest("   ✓ OK")
 
 -- Teste 6: unclosedTag
 logTest("6. Teste unclosedTag:")
-local msg4 = errors.unclosedTag("div", codigo, 11, "teste.lx")
+local msg4 = errors.unclosedTag("div", codigo, 11, "teste.dslx")
 logTest("   mensagem:", msg4)
 assert(msg4:find("div"), "deveria conter nome da tag")
 assert(msg4:find("</div>"), "deveria sugerir fechamento")
@@ -58,21 +58,21 @@ logTest("   ✓ OK")
 
 -- Teste 7: invalidTag
 logTest("7. Teste invalidTag:")
-local msg5 = errors.invalidTag(codigo, 1, "teste.lx")
+local msg5 = errors.invalidTag(codigo, 1, "teste.dslx")
 logTest("   mensagem:", msg5)
 assert(msg5:find("inválida") or msg5:find("malformada"), "deveria indicar tag inválida")
 logTest("   ✓ OK")
 
 -- Teste 8: compilationError
 logTest("8. Teste compilationError:")
-local msg6 = errors.compilationError("unexpected symbol", "teste.lx")
+local msg6 = errors.compilationError("unexpected symbol", "teste.dslx")
 logTest("   mensagem:", msg6)
 assert(msg6:find("compilar"), "deveria mencionar compilação")
 logTest("   ✓ OK")
 
 -- Teste 9: runtimeError
 logTest("9. Teste runtimeError:")
-local msg7 = errors.runtimeError("nil value", "teste.lx")
+local msg7 = errors.runtimeError("nil value", "teste.dslx")
 logTest("   mensagem:", msg7)
 assert(msg7:find("executar"), "deveria mencionar execução")
 logTest("   ✓ OK")

@@ -2,7 +2,7 @@
     Testes do módulo init.lua
     
     O módulo init.lua registra um searcher customizado que permite
-    usar require() para carregar arquivos .lx
+    usar require() para carregar arquivos .dslx
 ]]
 
 
@@ -44,41 +44,41 @@ test("Adiciona searcher ao package.searchers", function()
     assert(newSearchersCount >= originalSearchersCount, "não deveria remover searchers")
 end)
 
--- Teste 3: Searcher customizado procura por .lx
-test("Searcher customizado para .lx", function()
-    -- Tentar encontrar o searcher que retorna mensagem sobre .lx
+-- Teste 3: Searcher customizado procura por .dslx
+test("Searcher customizado para .dslx", function()
+    -- Tentar encontrar o searcher que retorna mensagem sobre .dslx
     local foundLxSearcher = false
     for i, searcher in ipairs(package.searchers) do
         if type(searcher) == "function" then
             local result = searcher("__modulo_inexistente_xyz__")
-            if type(result) == "string" and result:find("%.lx") then
+            if type(result) == "string" and result:find("%.dslx") then
                 foundLxSearcher = true
-                logTest("   searcher .lx encontrado na posição:", i)
+                logTest("   searcher .dslx encontrado na posição:", i)
                 break
             end
         end
     end
-    assert(foundLxSearcher, "deveria ter um searcher que menciona .lx")
+    assert(foundLxSearcher, "deveria ter um searcher que menciona .dslx")
 end)
 
--- Teste 4: Criar arquivo .lx temporário e carregar via require
-test("Carregar arquivo .lx via require", function()
+-- Teste 4: Criar arquivo .dslx temporário e carregar via require
+test("Carregar arquivo .dslx via require", function()
     -- Criar diretório temporário
     local tempPath = "/tmp/luaxml_init_test_" .. os.time()
     os.execute("mkdir -p " .. tempPath)
     
     -- Adicionar ao package.path
     local originalPath = package.path
-    package.path = tempPath .. "/?.lx;" .. package.path
+    package.path = tempPath .. "/?.dslx;" .. package.path
     
     -- Criar arquivo de teste
-    local testModulePath = tempPath .. "/test_lx_init_module.lx"
+    local testModulePath = tempPath .. "/test_lx_init_module.dslx"
     local f = io.open(testModulePath, "w")
     if f then
         f:write([[
 local M = {}
 function M.hello()
-    return "hello from .lx"
+    return "hello from .dslx"
 end
 return M
 ]])
@@ -98,7 +98,7 @@ return M
         if ok and mod and mod.hello then
             local result = mod.hello()
             logTest("   resultado:", result)
-            assert(result == "hello from .lx", "deveria retornar mensagem correta")
+            assert(result == "hello from .dslx", "deveria retornar mensagem correta")
         else
             logTest("   (módulo carregado mas sem função hello)")
         end
@@ -109,14 +109,14 @@ return M
 end)
 
 -- Teste 5: Carregar módulo com XML
-test("Carregar módulo .lx com sintaxe XML", function()
+test("Carregar módulo .dslx com sintaxe XML", function()
     local tempPath = "/tmp/luaxml_init_xml_test_" .. os.time()
     os.execute("mkdir -p " .. tempPath)
     
     local originalPath = package.path
-    package.path = tempPath .. "/?.lx;" .. package.path
+    package.path = tempPath .. "/?.dslx;" .. package.path
     
-    local xmlModulePath = tempPath .. "/test_xml_init_module.lx"
+    local xmlModulePath = tempPath .. "/test_xml_init_module.dslx"
     local f = io.open(xmlModulePath, "w")
     if f then
         f:write([[

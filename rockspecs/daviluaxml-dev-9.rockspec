@@ -1,22 +1,22 @@
 package = "DaviLuaXML"
 version = "dev-9"
 source = {
-   url = "git+https://github.com/pessoa736/luaXML"
+   url = "git+https://github.com/pessoa736/DaviLuaXML"
 }
 description = {
-   summary = "XML syntax support for Lua - write XML directly in your Lua code",
+   summary = "Davi System Lua XML - write XML directly in your Lua code",
    detailed = [[
-      DaviLuaXML is a library that allows you to use XML syntax inside Lua code.
+      Davi System Lua XML (DaviLuaXML) is a library that allows you to use XML syntax inside Lua code.
       XML tags are transformed into Lua function calls, similar to JSX in JavaScript.
       
       Features:
-      - Write XML directly in .lx files
+      - Write XML directly in .dslx files
       - Automatic transformation to Lua function calls
-      - Custom require() loader for .lx files
+      - Custom require() loader for .dslx files
       - Support for nested tags, expressions, and attributes
       - Built-in help system
    ]],
-   homepage = "https://github.com/pessoa736/luaXML",
+   homepage = "https://github.com/pessoa736/DaviLuaXML",
    license = "MIT"
 }
 dependencies = {

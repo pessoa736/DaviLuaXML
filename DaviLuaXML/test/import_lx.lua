@@ -1,5 +1,5 @@
 --[[
-    Testes de importação de arquivos .lx via require
+    Testes de importação de arquivos .dslx via require
     
     Testa a integração completa do loader DaviLuaXML com o sistema require do Lua.
 ]]
@@ -32,10 +32,10 @@ test("Registrar loader DaviLuaXML", function()
     logTest("   loader registrado com sucesso")
 end)
 
--- Teste: Carregar arquivo .lx via require
-test("Carregar arquivo .lx via require", function()
+-- Teste: Carregar arquivo .dslx via require
+test("Carregar arquivo .dslx via require", function()
     -- Limpar cache se existir
-    package.loaded["DaviLuaXML.test.lx.1"] = nil
+    package.loaded["DaviLuaXML.test.dslx.1"] = nil
     
     -- Capturar output do arquivo
     local oldPrint = print
@@ -47,7 +47,7 @@ test("Carregar arquivo .lx via require", function()
     end
     
     -- Carregar o arquivo
-    require("DaviLuaXML.test.lx.1")
+    require("DaviLuaXML.test.dslx.1")
     
     -- Restaurar print
     print = oldPrint
@@ -56,15 +56,15 @@ test("Carregar arquivo .lx via require", function()
     assert(#outputs > 0, "arquivo deveria produzir output")
 end)
 
--- Teste: Arquivo .lx pode ser recarregado
-test("Recarregar arquivo .lx", function()
-    package.loaded["DaviLuaXML.test.lx.1"] = nil
+-- Teste: Arquivo .dslx pode ser recarregado
+test("Recarregar arquivo .dslx", function()
+    package.loaded["DaviLuaXML.test.dslx.1"] = nil
     
-    local ok1 = pcall(require, "DaviLuaXML.test.lx.1")
+    local ok1 = pcall(require, "DaviLuaXML.test.dslx.1")
     assert(ok1, "primeira carga deveria funcionar")
     
     -- Segunda chamada deve usar cache
-    local ok2 = pcall(require, "DaviLuaXML.test.lx.1")
+    local ok2 = pcall(require, "DaviLuaXML.test.dslx.1")
     assert(ok2, "segunda carga deveria funcionar (do cache)")
 end)
 

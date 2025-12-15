@@ -1,6 +1,6 @@
-# DaviLuaXML - VS Code Extension
+# Davi System Lua XML - VS Code Extension
 
-Syntax highlighting and formatting support for `.lx` files (LuaXML - Lua with XML/JSX-like syntax).
+Syntax highlighting and formatting support for `.dslx` files (DSLX - Lua with XML/JSX-like syntax).
 
 ## Features
 
@@ -36,19 +36,19 @@ code --install-extension daviluaxml-0.1.0.vsix
 
 ## Usage
 
-Simply open any `.lx` file and the extension will automatically activate.
+Simply open any `.dslx` file and the extension will automatically activate.
 
 To format a document:
 
 - Use `Shift+Alt+F` (or `Shift+Option+F` on Mac)
 - Or right-click and select "Format Document"
 
-### Enable Lua Language Server for .lx
+### Enable Lua Language Server for .dslx
 
-To get Lua autocompletion and diagnostics in `.lx` files, add this to your VS Code `settings.json`:
+To get Lua autocompletion and diagnostics in `.dslx` files, add this to your VS Code `settings.json`:
 
 ```json
-"Lua.file.associations": ["*.lx", "*.lua"]
+"Lua.file.associations": ["*.dslx", "*.lua"]
 ```
 
 Or, for sumneko/lua (Lua Language Server):
@@ -60,7 +60,7 @@ Or, for sumneko/lua (Lua Language Server):
 "Lua.runtime.fileExtension": ["lua", "lx"]
 ```
 
-This will enable Lua suggestions and diagnostics in `.lx` files.
+This will enable Lua suggestions and diagnostics in `.dslx` files.
 
 ## Settings
 

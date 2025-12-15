@@ -2,11 +2,11 @@
     DaviLuaXML Core
     ============
     
-    Função principal para carregar e executar um arquivo .lx diretamente.
+    Função principal para carregar e executar um arquivo .dslx diretamente.
     
     FUNCIONALIDADE:
     ---------------
-    1. Lê o conteúdo do arquivo .lx
+    1. Lê o conteúdo do arquivo .dslx
     2. Transforma as tags XML em código Lua puro
     3. Compila e executa o código transformado
     4. Retorna o código transformado (ou erro)
@@ -15,15 +15,15 @@
     ----
     local lx = require("DaviLuaXML.core")
     
-    local resultado, erro = lx("meu_arquivo.lx")
+    local resultado, erro = lx("meu_arquivo.dslx")
     if erro then
         print("Erro:", erro)
     end
     
     DIFERENÇA PARA init.lua:
     ------------------------
-    - init.lua: registra um searcher para usar require() com arquivos .lx
-    - core.lua: executa diretamente um arquivo .lx pelo caminho
+    - init.lua: registra um searcher para usar require() com arquivos .dslx
+    - core.lua: executa diretamente um arquivo .dslx pelo caminho
 --]]
 
 local readFile = require("DaviLuaXML.readFile")
@@ -33,9 +33,9 @@ local errors = require("DaviLuaXML.errors")
 if not _G.log then _G.log = require("loglua") end
 local logDebug = _G.log.inSection("XMLRuntime")
 
---- Carrega, transforma e executa um arquivo .lx.
+--- Carrega, transforma e executa um arquivo .dslx.
 ---
---- @param file string Caminho do arquivo .lx
+--- @param file string Caminho do arquivo .dslx
 --- @return string|nil Código transformado (se sucesso)
 --- @return string|nil Mensagem de erro (se falha)
 return function(file)

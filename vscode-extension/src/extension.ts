@@ -138,9 +138,9 @@ function findModulePath(moduleName: string, workspaceRoot: string): string | nul
     // Locais para procurar
     const searchPaths = [
         path.join(workspaceRoot, moduleFile + '.lua'),
-        path.join(workspaceRoot, moduleFile + '.lx'),
+        path.join(workspaceRoot, moduleFile + '.dslx'),
         path.join(workspaceRoot, moduleFile, 'init.lua'),
-        path.join(workspaceRoot, moduleFile, 'init.lx'),
+        path.join(workspaceRoot, moduleFile, 'init.dslx'),
         path.join(workspaceRoot, 'lua_modules', 'share', 'lua', '5.4', moduleFile + '.lua'),
         path.join(workspaceRoot, 'lua_modules', 'share', 'lua', '5.4', moduleFile, 'init.lua'),
     ];
@@ -523,7 +523,7 @@ class LuaXMLCompletionProvider implements vscode.CompletionItemProvider {
                         if (!['node_modules', '.git', 'lua_modules', '.luarocks'].includes(entry.name)) {
                             await scanDir(fullPath, depth + 1);
                         }
-                    } else if (entry.isFile() && (entry.name.endsWith('.lua') || entry.name.endsWith('.lx'))) {
+                    } else if (entry.isFile() && (entry.name.endsWith('.lua') || entry.name.endsWith('.dslx'))) {
                         files.push(fullPath);
                     }
                 }

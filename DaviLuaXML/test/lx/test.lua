@@ -1,1 +1,0 @@
-require("DaviLuaXML.core")("./DaviLuaXML/test/lx/1.lx")

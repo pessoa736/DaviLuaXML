@@ -60,9 +60,9 @@ test("Ler arquivo com múltiplas linhas", function()
     removeTempFile(path)
 end)
 
--- Teste 3: Ler arquivo .lx de teste
-test("Ler arquivo .lx real", function()
-    local content = readFile("DaviLuaXML/test/lx/1.lx")
+-- Teste 3: Ler arquivo .dslx de teste
+test("Ler arquivo .dslx real", function()
+    local content = readFile("DaviLuaXML/test/dslx/1.dslx")
     assert(content ~= nil, "conteúdo não deveria ser nil")
     assert(#content > 0, "arquivo não deveria estar vazio")
     assert(content:find("soma") or content:find("function"), "deveria conter código Lua")

@@ -12,7 +12,7 @@ local core = require("DaviLuaXML.core")
 
 -- Criar arquivo temporário para testes
 local function createTempFile(content)
-    local path = "/tmp/luaxml_test_" .. os.time() .. ".lx"
+    local path = "/tmp/luaxml_test_" .. os.time() .. ".dslx"
     local f = io.open(path, "w")
     f:write(content)
     f:close()
@@ -52,7 +52,7 @@ logTest("   ✓ OK\n")
 
 -- Teste 3: Arquivo inexistente
 logTest("3. Arquivo inexistente:")
-local result3, err3 = core("/tmp/arquivo_que_nao_existe_xyz.lx")
+local result3, err3 = core("/tmp/arquivo_que_nao_existe_xyz.dslx")
 logTest("   erro:", err3 and err3:sub(1, 50) .. "..." or "nenhum")
 assert(result3 == nil, "deveria retornar nil")
 assert(err3 ~= nil, "deveria ter mensagem de erro")

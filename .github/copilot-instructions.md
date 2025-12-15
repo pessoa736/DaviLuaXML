@@ -1,8 +1,8 @@
-# Copilot Instructions - DaviLuaXML
+# Copilot Instructions - Davi System Lua XML (DaviLuaXML)
 
 ## Sobre o Projeto
 
-DaviLuaXML é uma biblioteca Lua que permite usar sintaxe XML diretamente no código Lua, similar ao JSX no JavaScript. Transforma `<tag attr="x">` em `tag({attr = "x"}, {})`.
+Davi System Lua XML (DaviLuaXML) é uma biblioteca Lua que permite usar sintaxe XML diretamente no código Lua, similar ao JSX no JavaScript. Transforma `<tag attr="x">` em `tag({attr = "x"}, {})`.
 
 - **Linguagem:** Lua 5.4+ (use `<const>`, `<close>` quando apropriado)
 - **Gerenciador de pacotes:** LuaRocks
@@ -15,7 +15,7 @@ DaviLuaXML é uma biblioteca Lua que permite usar sintaxe XML diretamente no có
 ```
 DaviLuaXML/
 ├── init.lua          # Registra o searcher para require()
-├── core.lua          # Executa arquivos .lx diretamente
+├── core.lua          # Executa arquivos .dslx diretamente
 ├── parser.lua        # Parse de tags XML
 ├── transform.lua     # Transforma XML em Lua
 ├── elements.lua      # Cria elementos (tabelas)

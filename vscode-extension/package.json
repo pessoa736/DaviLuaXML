@@ -1,7 +1,7 @@
 {
   "name": "daviluaxml",
-  "displayName": "DaviLuaXML",
-  "description": "Syntax highlighting, IntelliSense and formatting for .lx files (Lua with XML/JSX-like syntax)",
+  "displayName": "Davi System Lua XML",
+  "description": "Syntax highlighting, IntelliSense and formatting for .dslx files (Davi System Lua XML)",
   "version": "0.2.0",
   "publisher": "pessoa736",
   "icon": "icon.png",
@@ -21,7 +21,7 @@
     "lua",
     "xml",
     "jsx",
-    "lx",
+    "dslx",
     "daviluaxml",
     "syntax highlighting"
   ],
@@ -39,7 +39,7 @@
           "lx"
         ],
         "extensions": [
-          ".lx"
+          ".dslx"
         ],
         "configuration": "./language-configuration.json",
         "icon": {

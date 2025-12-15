@@ -51,12 +51,12 @@ QUICK START:
     -- 1. Load DaviLuaXML at the beginning of your program
     require("DaviLuaXML")
     
-    -- 2. Now you can use require() with .lx files
-    local App = require("my_component")  -- loads my_component.lx
+    -- 2. Now you can use require() with .dslx files
+    local App = require("my_component")  -- loads my_component.dslx
 
 BASIC EXAMPLE:
 --------------
-    -- file: app.lx
+    -- file: app.dslx
     local function Button(props, children)
         return string.format('<button class="%s">%s</button>', 
             props.class or "", 
@@ -359,8 +359,8 @@ EXAMPLE:
     local line, column = errors.getLineInfo("abc\ndef\nghi", 6)
     print(line, column)  -- 2, 2
     
-    local msg = errors.unclosedTag("div", "app.lx", code, 10)
-    -- [DaviLuaXML] app.lx: line 1, column 10: tag 'div' was not closed...
+    local msg = errors.unclosedTag("div", "app.dslx", code, 10)
+    -- [DaviLuaXML] app.dslx: line 1, column 10: tag 'div' was not closed...
 ]=]
 
 help.en.core = [=[
@@ -368,7 +368,7 @@ help.en.core = [=[
                           DaviLuaXML - Core                               
 ======================================================================
 
-The core module loads and executes .lx files directly.
+The core module loads and executes .dslx files directly.
 
 USAGE:
 ------
@@ -377,7 +377,7 @@ USAGE:
 
 PARAMETERS:
 -----------
-    path (string) - Path to the .lx file
+    path (string) - Path to the .dslx file
 
 RETURN:
 -------
@@ -389,7 +389,7 @@ EXAMPLE:
     local core = require("DaviLuaXML.core")
     
     -- Execute the file and return the transformed code
-    local code, err = core("my_app.lx")
+    local code, err = core("my_app.dslx")
     
     if err then
         print("Error:", err)
@@ -417,13 +417,13 @@ USAGE:
 ------
     require("DaviLuaXML")  -- or require("DaviLuaXML.init")
     
-    -- Now you can load .lx files with require()
+    -- Now you can load .dslx files with require()
     local App = require("my_component")
 
 HOW IT WORKS:
 -------------
     1. Adds a searcher to package.searchers
-    2. When require() is called, searches for .lx file
+    2. When require() is called, searches for .dslx file
     3. If found, transforms the code and returns the chunk
 
 EXAMPLE:
@@ -431,22 +431,22 @@ EXAMPLE:
     -- main.lua
     require("DaviLuaXML")
     
-    local config = require("config")      -- loads config.lx
-    local App = require("components.App") -- loads components/App.lx
+    local config = require("config")      -- loads config.dslx
+    local App = require("components.App") -- loads components/App.dslx
 
 PROJECT STRUCTURE:
 ------------------
     project/
         main.lua          -- require("DaviLuaXML") here
-        config.lx
+        config.dslx
         components/
-            App.lx
-            Button.lx
+            App.dslx
+            Button.dslx
 
 NOTES:
 ------
-    - The searcher uses package.path replacing .lua with .lx
-    - Works with dot paths (a.b.c becomes a/b/c.lx)
+    - The searcher uses package.path replacing .lua with .dslx
+    - Works with dot paths (a.b.c becomes a/b/c.dslx)
     - The loaded module stays in package.loaded normally
 ]=]
 
@@ -539,12 +539,12 @@ INICIO RAPIDO:
     -- 1. Carregue o DaviLuaXML no inicio do programa
     require("DaviLuaXML")
     
-    -- 2. Agora voce pode usar require() com arquivos .lx
-    local App = require("meu_componente")  -- carrega meu_componente.lx
+    -- 2. Agora voce pode usar require() com arquivos .dslx
+    local App = require("meu_componente")  -- carrega meu_componente.dslx
 
 EXEMPLO BASICO:
 ---------------
-    -- arquivo: app.lx
+    -- arquivo: app.dslx
     local function Botao(props, children)
         return string.format('<button class="%s">%s</button>', 
             props.class or "", 
@@ -847,8 +847,8 @@ EXEMPLO:
     local linha, coluna = errors.getLineInfo("abc\ndef\nghi", 6)
     print(linha, coluna)  -- 2, 2
     
-    local msg = errors.unclosedTag("div", "app.lx", codigo, 10)
-    -- [DaviLuaXML] app.lx: linha 1, coluna 10: tag 'div' nao foi fechada...
+    local msg = errors.unclosedTag("div", "app.dslx", codigo, 10)
+    -- [DaviLuaXML] app.dslx: linha 1, coluna 10: tag 'div' nao foi fechada...
 ]=]
 
 help.pt.core = [=[
@@ -856,7 +856,7 @@ help.pt.core = [=[
                           DaviLuaXML - Core                               
 ======================================================================
 
-O modulo core carrega e executa arquivos .lx diretamente.
+O modulo core carrega e executa arquivos .dslx diretamente.
 
 USO:
 ----
@@ -865,7 +865,7 @@ USO:
 
 PARAMETROS:
 -----------
-    caminho (string) - Caminho para o arquivo .lx
+    caminho (string) - Caminho para o arquivo .dslx
 
 RETORNO:
 --------
@@ -877,7 +877,7 @@ EXEMPLO:
     local core = require("DaviLuaXML.core")
     
     -- Executa o arquivo e retorna o codigo transformado
-    local codigo, err = core("meu_app.lx")
+    local codigo, err = core("meu_app.dslx")
     
     if err then
         print("Erro:", err)
@@ -905,13 +905,13 @@ USO:
 ----
     require("DaviLuaXML")  -- ou require("DaviLuaXML.init")
     
-    -- Agora voce pode carregar arquivos .lx com require()
+    -- Agora voce pode carregar arquivos .dslx com require()
     local App = require("meu_componente")
 
 FUNCIONAMENTO:
 --------------
     1. Adiciona um searcher em package.searchers
-    2. Quando require() e chamado, procura por arquivo .lx
+    2. Quando require() e chamado, procura por arquivo .dslx
     3. Se encontrar, transforma o codigo e retorna o chunk
 
 EXEMPLO:
@@ -919,22 +919,22 @@ EXEMPLO:
     -- main.lua
     require("DaviLuaXML")
     
-    local config = require("config")      -- carrega config.lx
-    local App = require("components.App") -- carrega components/App.lx
+    local config = require("config")      -- carrega config.dslx
+    local App = require("components.App") -- carrega components/App.dslx
 
 ESTRUTURA DE PROJETO:
 ---------------------
     projeto/
         main.lua          -- require("DaviLuaXML") aqui
-        config.lx
+        config.dslx
         components/
-            App.lx
-            Button.lx
+            App.dslx
+            Button.dslx
 
 NOTAS:
 ------
-    - O searcher usa package.path trocando .lua por .lx
-    - Funciona com caminhos com ponto (a.b.c vira a/b/c.lx)
+    - O searcher usa package.path trocando .lua por .dslx
+    - Funciona com caminhos com ponto (a.b.c vira a/b/c.dslx)
     - O modulo carregado fica em package.loaded normalmente
 ]=]
 
@@ -1027,12 +1027,12 @@ INICIO RAPIDO:
     -- 1. Carga DaviLuaXML al inicio del programa
     require("DaviLuaXML")
     
-    -- 2. Ahora puedes usar require() con archivos .lx
-    local App = require("mi_componente")  -- carga mi_componente.lx
+    -- 2. Ahora puedes usar require() con archivos .dslx
+    local App = require("mi_componente")  -- carga mi_componente.dslx
 
 EJEMPLO BASICO:
 ---------------
-    -- archivo: app.lx
+    -- archivo: app.dslx
     local function Boton(props, children)
         return string.format('<button class="%s">%s</button>', 
             props.class or "", 
@@ -1335,8 +1335,8 @@ EJEMPLO:
     local linea, columna = errors.getLineInfo("abc\ndef\nghi", 6)
     print(linea, columna)  -- 2, 2
     
-    local msg = errors.unclosedTag("div", "app.lx", codigo, 10)
-    -- [DaviLuaXML] app.lx: linea 1, columna 10: etiqueta 'div' no fue cerrada...
+    local msg = errors.unclosedTag("div", "app.dslx", codigo, 10)
+    -- [DaviLuaXML] app.dslx: linea 1, columna 10: etiqueta 'div' no fue cerrada...
 ]=]
 
 help.es.core = [=[
@@ -1344,7 +1344,7 @@ help.es.core = [=[
                           DaviLuaXML - Core                               
 ======================================================================
 
-El modulo core carga y ejecuta archivos .lx directamente.
+El modulo core carga y ejecuta archivos .dslx directamente.
 
 USO:
 ----
@@ -1353,7 +1353,7 @@ USO:
 
 PARAMETROS:
 -----------
-    ruta (string) - Ruta al archivo .lx
+    ruta (string) - Ruta al archivo .dslx
 
 RETORNO:
 --------
@@ -1365,7 +1365,7 @@ EJEMPLO:
     local core = require("DaviLuaXML.core")
     
     -- Ejecuta el archivo y retorna el codigo transformado
-    local codigo, err = core("mi_app.lx")
+    local codigo, err = core("mi_app.dslx")
     
     if err then
         print("Error:", err)
@@ -1393,13 +1393,13 @@ USO:
 ----
     require("DaviLuaXML")  -- o require("DaviLuaXML.init")
     
-    -- Ahora puedes cargar archivos .lx con require()
+    -- Ahora puedes cargar archivos .dslx con require()
     local App = require("mi_componente")
 
 FUNCIONAMIENTO:
 ---------------
     1. Agrega un searcher a package.searchers
-    2. Cuando se llama require(), busca un archivo .lx
+    2. Cuando se llama require(), busca un archivo .dslx
     3. Si lo encuentra, transforma el codigo y retorna el chunk
 
 EJEMPLO:
@@ -1407,22 +1407,22 @@ EJEMPLO:
     -- main.lua
     require("DaviLuaXML")
     
-    local config = require("config")      -- carga config.lx
-    local App = require("components.App") -- carga components/App.lx
+    local config = require("config")      -- carga config.dslx
+    local App = require("components.App") -- carga components/App.dslx
 
 ESTRUCTURA DE PROYECTO:
 -----------------------
     proyecto/
         main.lua          -- require("DaviLuaXML") aqui
-        config.lx
+        config.dslx
         components/
-            App.lx
-            Button.lx
+            App.dslx
+            Button.dslx
 
 NOTAS:
 ------
-    - El searcher usa package.path reemplazando .lua por .lx
-    - Funciona con rutas con punto (a.b.c se convierte en a/b/c.lx)
+    - El searcher usa package.path reemplazando .lua por .dslx
+    - Funciona con rutas con punto (a.b.c se convierte en a/b/c.dslx)
     - El modulo cargado queda en package.loaded normalmente
 ]=]
 
