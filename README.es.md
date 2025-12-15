@@ -52,13 +52,38 @@ DaviLuaXML transforma etiquetas XML en llamadas de función Lua:
 local el = <div class="container">Hola</div>
 
 -- Se convierte en:
-local el = div({class = "container"}, {"Hola"})
+local el = __daviluaxml_invoke(div, 'div', {class = "container"}, {[1] = "Hola"})
 ```
 
 La función recibe dos argumentos:
 
 - `props` - tabla con los atributos
 - `children` - tabla con los hijos (texto, números u otros elementos)
+
+## Extras
+
+### Validación de props (PropTypes)
+
+Si defines schemas, DaviLuaXML valida props en runtime:
+
+```lua
+local t = require("DaviLuaXML.proptypes")
+t.register("Boton", {
+    label = t.string({ required = true }),
+})
+```
+
+### Sourcemaps (errores en runtime)
+
+Los errores en runtime se reescriben para apuntar a las líneas originales del `.dslx` (mapeo simple por línea).
+
+### Tree-shaking (compilador)
+
+El compilador puede comentar `local X = require(...)` no usados:
+
+```bash
+dslxc --treeshake src/ dist/
+```
 
 ## Sintaxis XML
 
@@ -147,6 +172,11 @@ log.show("XMLRuntime")
 | `core` | Ejecuta archivos .dslx directamente |
 | `parser` | Hace parsing de etiquetas XML |
 | `transform` | Transforma XML en Lua |
+| `runtime` | Helper de invocación en runtime |
+| `proptypes` | Validación opcional de props |
+| `sourcemap` | Mapeo de líneas para errores en `.dslx` |
+| `treeshake` | Paso de tree-shaking del compilador |
+| `compile` | Pre-compila `.dslx` a `.lua` |
 | `elements` | Crea elementos (tablas) |
 | `props` | Procesa atributos |
 | `errors` | Formateo de errores |

@@ -58,7 +58,8 @@ test("Compilar arquivo individual", function()
     local content = f:read("*a")
     f:close()
     
-    assert(content:find("Button%("), "deveria conter chamada Button()")
+    assert(content:find("__daviluaxml_invoke%("), "deveria conter wrapper")
+    assert(content:find("Button"), "deveria conter nome Button")
     assert(content:find("Compiled by DaviLuaXML"), "deveria conter header")
 end)
 

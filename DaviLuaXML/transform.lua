@@ -59,6 +59,20 @@ local errors = require("DaviLuaXML.errors")
 if not _G.log then _G.log = require("loglua") end
 local logDebug = _G.log.inSection("XMLRuntime")
 
+local function countLines(str)
+  local _, n = tostring(str):gsub("\n", "\n")
+  return n + 1
+end
+
+local function lineAt(code, pos)
+  if pos <= 1 then
+    return 1
+  end
+  local prefix = code:sub(1, pos - 1)
+  local _, n = prefix:gsub("\n", "\n")
+  return n + 1
+end
+
 --------------------------------------------------------------------------------
 -- FUNÇÕES AUXILIARES
 --------------------------------------------------------------------------------
@@ -149,11 +163,21 @@ end
 --- Exemplo:
 ---   transform_code('<btn onClick={handler}>Clique</btn>')
 ---   -- Retorna: 'btn({onClick = handler}, {"Clique"})'
-local function transform_code(code, filename)
+local function transform_code(code, filename, options)
   logDebug("[transform] Iniciando transformação:", filename or "<string>")
   local pos = 1
   local originalCode = code
   local tagCount = 0
+
+  options = options or {}
+  local injectRuntime = (options.injectRuntime ~= false)
+
+  local map = {
+    filename = filename,
+    headerLines = 0,
+    checkpoints = {},
+  }
+  local cumulativeDelta = 0
   
   while true do
     -- Encontrar próximo elemento
@@ -175,6 +199,16 @@ local function transform_code(code, filename)
     -- Converter elemento em chamada de função
     local callStr = fcst(element)
     logDebug("[transform] Convertido para:", callStr:sub(1, 60) .. (#callStr > 60 and "..." or ""))
+
+    -- Atualizar sourcemap (delta de linhas)
+    local originalTagText = code:sub(s, tagEnd)
+    local origLines = countLines(originalTagText)
+    local newLines = countLines(callStr)
+    cumulativeDelta = cumulativeDelta + (origLines - newLines)
+    table.insert(map.checkpoints, {
+      line = lineAt(code, s),
+      delta = cumulativeDelta,
+    })
     
     -- Substituir tag pelo código Lua
     code = code:sub(1, s - 1) .. callStr .. code:sub(tagEnd + 1)
@@ -183,8 +217,13 @@ local function transform_code(code, filename)
     pos = s + #callStr
   end
   
+  if injectRuntime and tagCount > 0 then
+    code = 'local __daviluaxml_invoke = require("DaviLuaXML.runtime").invoke\n' .. code
+    map.headerLines = 1
+  end
+
   logDebug("[transform] Transformação concluída:", tagCount, "tags processadas")
-  return code, nil
+  return code, nil, map
 end
 
 --------------------------------------------------------------------------------

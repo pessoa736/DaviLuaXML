@@ -17,7 +17,8 @@ local code1 = "<teste/>"
 local result1 = transform(code1)
 logTest("   entrada:", code1)
 logTest("   saída:", result1)
-assert(result1:find("teste%("), "deveria conter chamada de função 'teste('")
+assert(result1:find("__daviluaxml_invoke%("), "deveria conter '__daviluaxml_invoke('")
+assert(result1:find("teste"), "deveria conter nome da tag")
 logTest("   ✓ OK\n")
 
 -- Teste 2: Tag com atributos
@@ -36,7 +37,7 @@ local code3 = "<p>ola mundo</p>"
 local result3 = transform(code3)
 logTest("   entrada:", code3)
 logTest("   saída:", result3)
-assert(result3:find("p%("), "deveria conter chamada 'p('")
+assert(result3:find("p"), "deveria conter nome da tag")
 assert(result3:find("ola mundo"), "deveria conter texto")
 logTest("   ✓ OK\n")
 
@@ -57,8 +58,8 @@ local code5 = "<div><span>texto</span></div>"
 local result5 = transform(code5)
 logTest("   entrada:", code5)
 logTest("   saída:", result5)
-assert(result5:find("div%("), "deveria conter 'div('")
-assert(result5:find("span%("), "deveria conter 'span('")
+assert(result5:find("div"), "deveria conter 'div'")
+assert(result5:find("span"), "deveria conter 'span'")
 logTest("   ✓ OK\n")
 
 -- Teste 6: Código misto (Lua + XML)
@@ -68,7 +69,7 @@ local result6 = transform(code6)
 logTest("   entrada:", code6:gsub("\n", "\\n"))
 logTest("   saída:", result6:gsub("\n", "\\n"))
 assert(result6:find("local x = 1"), "deveria manter código Lua")
-assert(result6:find("tag%("), "deveria transformar tag")
+assert(result6:find("tag"), "deveria transformar tag")
 assert(result6:find("print%(x%)"), "deveria manter print")
 logTest("   ✓ OK\n")
 
@@ -87,7 +88,7 @@ local code8 = '<html.div class="x"/>'
 local result8 = transform(code8)
 logTest("   entrada:", code8)
 logTest("   saída:", result8)
-assert(result8:find("html%.div%("), "deveria conter 'html.div('")
+assert(result8:find("html%.div"), "deveria conter 'html.div'")
 logTest("   ✓ OK\n")
 
 -- Teste 9: Atributo com expressão

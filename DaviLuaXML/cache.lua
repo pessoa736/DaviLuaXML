@@ -70,6 +70,55 @@ local function getCachePath(filepath, contentHash)
     return string.format("%s/%s_%s.lua", M.cacheDir, pathHash, contentHash)
 end
 
+local function getMapPath(cachePath)
+    return cachePath:gsub("%.lua$", "") .. ".map.lua"
+end
+
+local function escapeLuaString(s)
+    return string.format("%q", tostring(s))
+end
+
+local function serializeLua(value)
+    local t = type(value)
+    if t == "nil" then
+        return "nil"
+    elseif t == "string" then
+        return escapeLuaString(value)
+    elseif t == "number" or t == "boolean" then
+        return tostring(value)
+    elseif t == "table" then
+        local isArray = true
+        local max = 0
+        for k, _ in pairs(value) do
+            if type(k) ~= "number" then
+                isArray = false
+                break
+            end
+            if k > max then max = k end
+        end
+
+        local parts = {}
+        if isArray then
+            for i = 1, max do
+                parts[#parts + 1] = serializeLua(value[i])
+            end
+            return "{" .. table.concat(parts, ",") .. "}"
+        end
+
+        for k, v in pairs(value) do
+            local key
+            if type(k) == "string" and k:match("^[%a_][%w_]*$") then
+                key = k
+            else
+                key = "[" .. serializeLua(k) .. "]"
+            end
+            parts[#parts + 1] = key .. " = " .. serializeLua(v)
+        end
+        return "{" .. table.concat(parts, ",") .. "}"
+    end
+    return escapeLuaString(tostring(value))
+end
+
 --------------------------------------------------------------------------------
 -- API PÚBLICA
 --------------------------------------------------------------------------------
@@ -85,13 +134,29 @@ function M.get(filepath, content)
     
     local contentHash = hash(content)
     local cachePath = getCachePath(filepath, contentHash)
+    local mapPath = getMapPath(cachePath)
     
     local f = io.open(cachePath, "r")
     if f then
         local cached = f:read("*a")
         f:close()
         logDebug("[cache] HIT:", filepath)
-        return cached
+
+        local map
+        local mf = io.open(mapPath, "r")
+        if mf then
+            local mcode = mf:read("*a")
+            mf:close()
+            local loader = load(mcode, "@" .. mapPath)
+            if loader then
+                local ok, res = pcall(loader)
+                if ok and type(res) == "table" then
+                    map = res
+                end
+            end
+        end
+
+        return cached, map
     end
     
     logDebug("[cache] MISS:", filepath)
@@ -102,7 +167,8 @@ end
 --- @param filepath string Caminho do arquivo .dslx original
 --- @param content string Conteúdo original do arquivo
 --- @param transformed string Código Lua transformado
-function M.set(filepath, content, transformed)
+--- @param map table|nil Sourcemap opcional
+function M.set(filepath, content, transformed, map)
     if not M.enabled then
         return
     end
@@ -111,27 +177,32 @@ function M.set(filepath, content, transformed)
     
     local contentHash = hash(content)
     local cachePath = getCachePath(filepath, contentHash)
+    local mapPath = getMapPath(cachePath)
     
     local f = io.open(cachePath, "w")
     if f then
-        -- Adicionar metadata como comentário
-        f:write(string.format(
-            "-- DaviLuaXML Cache\n-- Source: %s\n-- Hash: %s\n-- Generated: %s\n\n",
-            filepath,
-            contentHash,
-            os.date("%Y-%m-%d %H:%M:%S")
-        ))
         f:write(transformed)
         f:close()
         logDebug("[cache] SET:", filepath, "->", cachePath)
     else
         logDebug("[cache] ERRO ao salvar:", cachePath)
     end
+
+    if map and type(map) == "table" then
+        local mf = io.open(mapPath, "w")
+        if mf then
+            mf:write("return ")
+            mf:write(serializeLua(map))
+            mf:write("\n")
+            mf:close()
+        end
+    end
 end
 
 --- Limpa todo o cache.
 function M.clear()
     os.execute("rm -rf " .. M.cacheDir .. "/*.lua 2>/dev/null")
+    os.execute("rm -rf " .. M.cacheDir .. "/*.map.lua 2>/dev/null")
     logDebug("[cache] Cache limpo")
 end
 

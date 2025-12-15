@@ -35,6 +35,7 @@
 
 local readFile = require("DaviLuaXML.readFile")
 local transform = require("DaviLuaXML.transform").transform
+local treeshake = require("DaviLuaXML.treeshake")
 
 if not _G.log then _G.log = require("loglua") end
 local logDebug = _G.log.inSection("XMLCompile")
@@ -53,6 +54,9 @@ M.outputExtension = ".lua"
 
 --- Adicionar header informativo
 M.addHeader = true
+
+--- Habilitar tree-shaking (básico) no output
+M.enableTreeShaking = false
 
 --- Versão do compilador
 M.version = "1.0.0"
@@ -142,6 +146,10 @@ function M.file(inputPath, outputPath)
     if err or not transformed then
         return false, "Erro na transformação: " .. (err or "unknown")
     end
+
+    if M.enableTreeShaking then
+        transformed = treeshake.apply(transformed)
+    end
     
     -- Adicionar header se configurado
     local output = transformed
@@ -221,6 +229,7 @@ Examples:
 
 Options:
   --no-header                        Don't add header comment to output
+    --treeshake                         Comment out unused `local X = require(...)` lines
   --version                          Show version
   --help                             Show this help
 ]])
@@ -236,6 +245,8 @@ Options:
     for i, a in ipairs(args) do
         if a == "--no-header" then
             M.addHeader = false
+        elseif a == "--treeshake" then
+            M.enableTreeShaking = true
         elseif a == "--version" then
             print("DaviLuaXML Compiler v" .. M.version)
             return

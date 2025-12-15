@@ -84,7 +84,7 @@ fcst = function(element)
     local propsStr = propsToString(props, element)
     local childrenStr = childrenToString(children, element)
 
-    return tag .. "(" .. propsStr .. ", " .. childrenStr .. ")"
+    return "__daviluaxml_invoke(" .. tag .. ", " .. serializeString(tag) .. ", " .. propsStr .. ", " .. childrenStr .. ")"
 end
 
 return fcst

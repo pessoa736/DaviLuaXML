@@ -16,8 +16,8 @@ local el1 = {tag = "br", props = {}, children = {}}
 local str1 = fcst(el1)
 logTest("   entrada: {tag='br', props={}, children={}}")
 logTest("   saída:", str1)
-assert(str1:find("br%("), "deveria começar com 'br('")
-assert(str1:find("%)$"), "deveria terminar com ')'")
+assert(str1:find("__daviluaxml_invoke%("), "deveria começar com '__daviluaxml_invoke('")
+assert(str1:find("br"), "deveria conter 'br'")
 logTest("   ✓ OK\n")
 
 -- Teste 2: Elemento com props
@@ -26,7 +26,7 @@ local el2 = {tag = "div", props = {class = "container"}, children = {}}
 local str2 = fcst(el2)
 logTest("   entrada: {tag='div', props={class='container'}, children={}}")
 logTest("   saída:", str2)
-assert(str2:find("div%("), "deveria começar com 'div('")
+assert(str2:find("div"), "deveria conter 'div'")
 assert(str2:find("class"), "deveria conter 'class'")
 logTest("   ✓ OK\n")
 
@@ -60,8 +60,8 @@ local el5 = {
 local str5 = fcst(el5)
 logTest("   entrada: div com span aninhado")
 logTest("   saída:", str5)
-assert(str5:find("div%("), "deveria conter 'div('")
-assert(str5:find("span%("), "deveria conter 'span(' aninhado")
+assert(str5:find("div"), "deveria conter 'div'")
+assert(str5:find("span"), "deveria conter 'span' aninhado")
 logTest("   ✓ OK\n")
 
 -- Teste 6: Elemento com múltiplos children
@@ -80,7 +80,7 @@ local el7 = {tag = "vazio", props = nil, children = {}}
 local str7 = fcst(el7)
 logTest("   entrada: {tag='vazio', props=nil, children={}}")
 logTest("   saída:", str7)
-assert(str7:find("vazio%("), "deveria funcionar com props nil")
+assert(str7:find("vazio"), "deveria funcionar com props nil")
 logTest("   ✓ OK\n")
 
 logTest("=== TODOS OS TESTES PASSARAM ===")

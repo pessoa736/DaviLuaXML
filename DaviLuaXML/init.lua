@@ -37,6 +37,7 @@ local readFile = require("DaviLuaXML.readFile")
 local transform = require("DaviLuaXML.transform").transform
 local errors = require("DaviLuaXML.errors")
 local cache = require("DaviLuaXML.cache")
+local sourcemap = require("DaviLuaXML.sourcemap")
 
 if not _G.log then _G.log = require("loglua") end
 local logDebug = _G.log.inSection("XMLRuntime")
@@ -89,12 +90,12 @@ local function lx_searcher(modname)
 	logDebug("[searcher] Código lido, tamanho:", #code, "bytes")
 	
 	-- Tentar obter do cache
-	local transformed = cache.get(filename, code)
+	local transformed, map = cache.get(filename, code)
 	
 	if not transformed then
 		-- Transformar e salvar no cache
 		local transformErr
-		transformed, transformErr = transform(code, filename)
+		transformed, transformErr, map = transform(code, filename)
 		
 		if transformErr or not transformed then
 			logDebug("[searcher] ERRO na transformação:", transformErr)
@@ -102,7 +103,7 @@ local function lx_searcher(modname)
 		end
 		
 		-- Salvar no cache para próxima vez
-		cache.set(filename, code, transformed)
+		cache.set(filename, code, transformed, map)
 	end
 	
 	local chunk, err = load(transformed, "@"..filename)
@@ -113,7 +114,20 @@ local function lx_searcher(modname)
 	end
 	
 	logDebug("[searcher] Módulo carregado com sucesso:", modname)
-	return chunk, filename
+	local function handler(e)
+		return sourcemap.rewriteError(tostring(e), map)
+	end
+
+	local wrapped = function(...)
+		local results = { xpcall(chunk, handler, ...) }
+		local ok = table.remove(results, 1)
+		if not ok then
+			error(results[1], 0)
+		end
+		return table.unpack(results)
+	end
+
+	return wrapped, filename
 end
 
 --------------------------------------------------------------------------------

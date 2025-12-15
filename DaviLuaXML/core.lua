@@ -29,6 +29,7 @@
 local readFile = require("DaviLuaXML.readFile")
 local transform = require("DaviLuaXML.transform").transform
 local errors = require("DaviLuaXML.errors")
+local sourcemap = require("DaviLuaXML.sourcemap")
 
 if not _G.log then _G.log = require("loglua") end
 local logDebug = _G.log.inSection("XMLRuntime")
@@ -50,7 +51,7 @@ return function(file)
     logDebug("[core] Arquivo lido com sucesso, tamanho:", #code, "bytes")
     
     -- Transformar código
-    local transformed, transformErr = transform(code, file)
+    local transformed, transformErr, map = transform(code, file)
     if transformErr or not transformed then
         logDebug("[core] ERRO na transformação:", transformErr)
         return nil, transformErr
@@ -66,7 +67,11 @@ return function(file)
     logDebug("[core] Código compilado com sucesso")
     
     -- Executar
-    local execOk, runErr = pcall(chunk)
+    local function handler(e)
+        return sourcemap.rewriteError(tostring(e), map)
+    end
+
+    local execOk, runErr = xpcall(chunk, handler)
     if not execOk then
         logDebug("[core] ERRO na execução:", runErr)
         return nil, errors.runtimeError(tostring(runErr), file)

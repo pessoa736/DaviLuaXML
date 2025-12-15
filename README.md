@@ -52,13 +52,38 @@ DaviLuaXML transforms XML tags into Lua function calls:
 local el = <div class="container">Hello</div>
 
 -- Becomes:
-local el = div({class = "container"}, {"Hello"})
+local el = __daviluaxml_invoke(div, 'div', {class = "container"}, {[1] = "Hello"})
 ```
 
 The function receives two arguments:
 
 - `props` - table with the attributes
 - `children` - table with the children (text, numbers or other elements)
+
+## Extras
+
+### Props validation (PropTypes)
+
+If you define schemas, DaviLuaXML validates props at runtime:
+
+```lua
+local t = require("DaviLuaXML.proptypes")
+t.register("Button", {
+    label = t.string({ required = true }),
+})
+```
+
+### Sourcemaps (runtime errors)
+
+Runtime errors are rewritten to point to the original `.dslx` line numbers (simple line mapping).
+
+### Tree-shaking (compiler)
+
+The compiler can comment out unused `local X = require(...)` lines:
+
+```bash
+dslxc --treeshake src/ dist/
+```
 
 ## XML Syntax
 
@@ -147,6 +172,11 @@ log.show("XMLRuntime")
 | `core` | Directly executes .dslx files |
 | `parser` | Parses XML tags |
 | `transform` | Transforms XML to Lua |
+| `runtime` | Runtime invoke helper for transformed code |
+| `proptypes` | Optional runtime props validation |
+| `sourcemap` | Error line mapping for `.dslx` |
+| `treeshake` | Tree-shaking pass for compiler |
+| `compile` | Pre-compiles `.dslx` to `.lua` |
 | `elements` | Creates elements (tables) |
 | `props` | Processes attributes |
 | `errors` | Error formatting |

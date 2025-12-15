@@ -36,7 +36,7 @@ end)
 test("Set e Get", function()
     local filepath = "/tmp/test_cache_" .. os.time() .. ".dslx"
     local content = "local x = <div/>"
-    local transformed = "local x = div({}, {})"
+    local transformed = "local x = __daviluaxml_invoke(div, 'div', {}, {})"
     
     -- Salvar no cache
     cache.set(filepath, content, transformed)
@@ -44,7 +44,7 @@ test("Set e Get", function()
     -- Recuperar do cache
     local cached = cache.get(filepath, content)
     assert(cached ~= nil, "deveria retornar código do cache")
-    assert(cached:find("div%("), "código em cache deveria conter transformação")
+    assert(cached:find("__daviluaxml_invoke%("), "código em cache deveria conter wrapper")
 end)
 
 -- Teste 3: Cache invalida com conteúdo diferente
@@ -52,7 +52,7 @@ test("Cache invalida com conteúdo diferente", function()
     local filepath = "/tmp/test_cache_invalidate_" .. os.time() .. ".dslx"
     local content1 = "local x = <div/>"
     local content2 = "local x = <span/>"  -- Conteúdo diferente
-    local transformed = "local x = div({}, {})"
+    local transformed = "local x = __daviluaxml_invoke(div, 'div', {}, {})"
     
     -- Salvar no cache com content1
     cache.set(filepath, content1, transformed)
@@ -69,7 +69,7 @@ test("Desabilitar cache", function()
     
     local filepath = "/tmp/test_cache_disabled_" .. os.time() .. ".dslx"
     local content = "local x = <div/>"
-    local transformed = "local x = div({}, {})"
+    local transformed = "local x = __daviluaxml_invoke(div, 'div', {}, {})"
     
     cache.set(filepath, content, transformed)
     local cached = cache.get(filepath, content)

@@ -73,6 +73,11 @@ Use help("topic") for more information:
     - syntax     - Supported XML syntax
     - parser     - Parsing module
     - transform  - Transformation module
+    - runtime    - Runtime helper (invoke wrapper)
+    - proptypes  - Props validation (PropTypes)
+    - sourcemap  - Error line mapping for .dslx
+    - treeshake  - Tree-shaking (compiler)
+    - compile    - Pre-compile .dslx -> .lua
     - elements   - Element creation
     - props      - Property handling
     - middleware - Middleware system for props/children
@@ -137,11 +142,11 @@ NAMES WITH DOT:
 
 TRANSFORMATION:
 ---------------
-    -- XML code is transformed into function calls:
+    -- XML code is transformed into calls routed through a runtime helper:
     <Tag prop="value">text</Tag>
     
     -- Becomes:
-    Tag({prop = 'value'}, {[1] = 'text'})
+    __daviluaxml_invoke(Tag, 'Tag', {prop = 'value'}, {[1] = 'text'})
     
     -- The function receives: (props, children)
 ]=]
@@ -207,7 +212,7 @@ The transform module converts Lua+XML code into pure Lua code.
 USAGE:
 ------
     local transform = require("DaviLuaXML.transform").transform
-    local result, err = transform(code, file)
+    local result, err, map = transform(code, file)
 
 PARAMETERS:
 -----------
@@ -218,6 +223,7 @@ RETURN:
 -------
     result (string)  - Transformed Lua code (or nil if error)
     err (string)     - Error message (or nil if success)
+    map (table)       - Optional sourcemap info (line mapping)
 
 EXAMPLE:
 --------
@@ -238,7 +244,119 @@ NOTES:
     - Lua reserved tags (const, close) are preserved
     - Multiple tags can exist in the same code
     - Expressions in {} are evaluated during transformation
+    - When at least one tag is transformed, a helper binding is injected:
+        local __daviluaxml_invoke = require("DaviLuaXML.runtime").invoke
 ]==]
+
+help.en.runtime = [=[
+======================================================================
+                         DaviLuaXML - Runtime
+======================================================================
+
+The runtime module provides helpers used by transformed code.
+
+The transformer routes tag calls through:
+    __daviluaxml_invoke(tagExpr, 'tagName', props, children)
+
+This enables features like:
+  - prop validation (PropTypes)
+  - consistent invocation of functions / callable tables
+
+USAGE:
+------
+    local runtime = require("DaviLuaXML.runtime")
+    local result = runtime.invoke(MyTag, "MyTag", {x = 1}, {"child"})
+
+CALLABLE RULES:
+--------------
+runtime.invoke supports:
+  - function(props, children)
+  - callable table via metatable __call
+  - table with render(props, children)
+]=]
+
+help.en.proptypes = [=[
+======================================================================
+                        DaviLuaXML - PropTypes
+======================================================================
+
+PropTypes is an optional runtime props validation system.
+
+You can define schemas in two ways:
+
+1) Registry (by tag name):
+    local t = require("DaviLuaXML.proptypes")
+    t.register("Button", {
+        label = t.string({ required = true }),
+        disabled = t.boolean(),
+        variant = t.oneOf({"primary", "secondary"}),
+    })
+
+2) Component-local (propTypes field):
+    local t = require("DaviLuaXML.proptypes")
+    local Button = setmetatable({
+        propTypes = { label = t.string({ required = true }) }
+    }, { __call = function(self, props, children) ... end })
+
+Disable validation:
+    require("DaviLuaXML.proptypes").enabled = false
+]=]
+
+help.en.sourcemap = [=[
+======================================================================
+                        DaviLuaXML - Sourcemaps
+======================================================================
+
+DaviLuaXML generates a simple line-based mapping when transforming .dslx.
+
+The loader (require searcher) and core runner rewrite runtime errors so
+line numbers point to the original .dslx file.
+
+LIMITATIONS:
+------------
+This is a lightweight line mapper (not a full column-accurate sourcemap).
+]=]
+
+help.en.treeshake = [=[
+======================================================================
+                       DaviLuaXML - Tree-shaking
+======================================================================
+
+Tree-shaking is a conservative compiler-only pass.
+
+It comments out unused lines like:
+    local X = require("...")
+
+If the identifier X is not referenced elsewhere, the line is commented.
+
+USAGE (CLI):
+-----------
+    dslxc --treeshake src/ dist/
+]=]
+
+help.en.compile = [=[
+======================================================================
+                         DaviLuaXML - Compile
+======================================================================
+
+The compile module pre-compiles .dslx files into plain .lua.
+
+USAGE:
+------
+    local compile = require("DaviLuaXML.compile")
+    compile.file("app.dslx")
+    compile.dir("src/", "dist/")
+
+CLI:
+----
+    dslxc app.dslx
+    dslxc src/ dist/
+
+OPTIONS:
+--------
+    --no-header   Do not add header
+    --treeshake   Comment-out unused requires
+]=]
 
 help.en.elements = [=[
 ======================================================================
@@ -561,6 +679,11 @@ Use help("topico") para mais informacoes:
     - sintaxe    - Sintaxe XML suportada
     - parser     - Modulo de parsing
     - transform  - Modulo de transformacao
+    - runtime    - Helper de runtime (invoke wrapper)
+    - proptypes  - Validacao de props (PropTypes)
+    - sourcemap  - Mapeamento de linhas para erros em .dslx
+    - treeshake  - Tree-shaking (compilador)
+    - compile    - Pre-compilacao .dslx -> .lua
     - elements   - Criacao de elementos
     - props      - Manipulacao de propriedades
     - middleware - Sistema de middleware para props/children
@@ -625,11 +748,11 @@ NOMES COM PONTO:
 
 TRANSFORMACAO:
 --------------
-    -- O codigo XML e transformado em chamadas de funcao:
+    -- O codigo XML e transformado em chamadas roteadas por um helper:
     <Tag prop="valor">texto</Tag>
     
     -- Vira:
-    Tag({prop = 'valor'}, {[1] = 'texto'})
+    __daviluaxml_invoke(Tag, 'Tag', {prop = 'valor'}, {[1] = 'texto'})
     
     -- A funcao recebe: (props, children)
 ]=]
@@ -695,7 +818,7 @@ O modulo transform converte codigo Lua+XML em codigo Lua puro.
 USO:
 ----
     local transform = require("DaviLuaXML.transform").transform
-    local resultado, erro = transform(codigo, arquivo)
+    local resultado, erro, map = transform(codigo, arquivo)
 
 PARAMETROS:
 -----------
@@ -706,6 +829,7 @@ RETORNO:
 --------
     resultado (string) - Codigo Lua transformado (ou nil se erro)
     erro (string)      - Mensagem de erro (ou nil se sucesso)
+    map (table)         - Sourcemap simples (mapeamento de linhas)
 
 EXEMPLO:
 --------
@@ -726,7 +850,102 @@ NOTAS:
     - Tags reservadas do Lua (const, close) sao preservadas
     - Multiplas tags podem existir no mesmo codigo
     - Expressoes em {} sao avaliadas durante a transformacao
+    - Quando pelo menos uma tag e transformada, injeta:
+        local __daviluaxml_invoke = require("DaviLuaXML.runtime").invoke
 ]==]
+
+help.pt.runtime = [=[
+======================================================================
+                         DaviLuaXML - Runtime
+======================================================================
+
+O modulo runtime fornece helpers usados pelo codigo transformado.
+
+O transformer gera chamadas como:
+    __daviluaxml_invoke(tagExpr, 'tagName', props, children)
+
+Isso habilita:
+  - validacao de props (PropTypes)
+  - invocacao consistente de funcoes / tabelas chamaveis
+]=]
+
+help.pt.proptypes = [=[
+======================================================================
+                        DaviLuaXML - PropTypes
+======================================================================
+
+PropTypes e um sistema opcional de validacao de props em runtime.
+
+1) Registry (por nome da tag):
+    local t = require("DaviLuaXML.proptypes")
+    t.register("Botao", {
+        label = t.string({ required = true }),
+        disabled = t.boolean(),
+    })
+
+2) No componente (campo propTypes):
+    local t = require("DaviLuaXML.proptypes")
+    local Botao = setmetatable({
+        propTypes = { label = t.string({ required = true }) }
+    }, { __call = function(self, props, children) ... end })
+
+Desligar validacao:
+    require("DaviLuaXML.proptypes").enabled = false
+]=]
+
+help.pt.sourcemap = [=[
+======================================================================
+                        DaviLuaXML - Sourcemaps
+======================================================================
+
+O DaviLuaXML gera um mapeamento simples por linha ao transformar .dslx.
+
+O loader (searcher do require) e o core reescrevem erros de runtime para
+apontar para as linhas do .dslx original.
+
+LIMITACOES:
+-----------
+E um mapeador leve por linha (nao e um sourcemap completo por coluna).
+]=]
+
+help.pt.treeshake = [=[
+======================================================================
+                       DaviLuaXML - Tree-shaking
+======================================================================
+
+Tree-shaking e um passo conservador do compilador.
+
+Ele comenta linhas `local X = require("...")` que nao sao usadas no resto
+do codigo.
+
+USO (CLI):
+---------
+    dslxc --treeshake src/ dist/
+]=]
+
+help.pt.compile = [=[
+======================================================================
+                         DaviLuaXML - Compile
+======================================================================
+
+O modulo compile pre-compila arquivos .dslx para .lua puro.
+
+USO:
+----
+    local compile = require("DaviLuaXML.compile")
+    compile.file("app.dslx")
+    compile.dir("src/", "dist/")
+
+CLI:
+----
+    dslxc app.dslx
+    dslxc src/ dist/
+
+OPCOES:
+-------
+    --no-header   Nao adiciona header
+    --treeshake   Comenta requires nao usados
+]=]
 
 help.pt.elements = [=[
 ======================================================================
@@ -1049,6 +1268,11 @@ Usa help("tema") para mas informacion:
     - sintaxis   - Sintaxis XML soportada
     - parser     - Modulo de parsing
     - transform  - Modulo de transformacion
+    - runtime    - Helper de runtime (invoke wrapper)
+    - proptypes  - Validacion de props (PropTypes)
+    - sourcemap  - Mapeo de lineas para errores en .dslx
+    - treeshake  - Tree-shaking (compilador)
+    - compile    - Pre-compilacion .dslx -> .lua
     - elements   - Creacion de elementos
     - props      - Manejo de propiedades
     - middleware - Sistema de middleware para props/children
@@ -1113,11 +1337,11 @@ NOMBRES CON PUNTO:
 
 TRANSFORMACION:
 ---------------
-    -- El codigo XML se transforma en llamadas de funcion:
+    -- El codigo XML se transforma y se enruta por un helper:
     <Tag prop="valor">texto</Tag>
     
     -- Se convierte en:
-    Tag({prop = 'valor'}, {[1] = 'texto'})
+    __daviluaxml_invoke(Tag, 'Tag', {prop = 'valor'}, {[1] = 'texto'})
     
     -- La funcion recibe: (props, children)
 ]=]
@@ -1183,7 +1407,7 @@ El modulo transform convierte codigo Lua+XML en codigo Lua puro.
 USO:
 ----
     local transform = require("DaviLuaXML.transform").transform
-    local resultado, error = transform(codigo, archivo)
+    local resultado, error, map = transform(codigo, archivo)
 
 PARAMETROS:
 -----------
@@ -1194,6 +1418,7 @@ RETORNO:
 --------
     resultado (string) - Codigo Lua transformado (o nil si hay error)
     error (string)     - Mensaje de error (o nil si exito)
+    map (table)         - Sourcemap simple (mapeo de lineas)
 
 EJEMPLO:
 --------
@@ -1214,7 +1439,101 @@ NOTAS:
     - Las etiquetas reservadas de Lua (const, close) se preservan
     - Multiples etiquetas pueden existir en el mismo codigo
     - Las expresiones en {} se evaluan durante la transformacion
+    - Cuando al menos una etiqueta se transforma, inyecta:
+        local __daviluaxml_invoke = require("DaviLuaXML.runtime").invoke
 ]==]
+
+help.es.runtime = [=[
+======================================================================
+                         DaviLuaXML - Runtime
+======================================================================
+
+El modulo runtime provee helpers usados por el codigo transformado.
+
+El transformer genera llamadas como:
+    __daviluaxml_invoke(tagExpr, 'tagName', props, children)
+
+Esto habilita:
+  - validacion de props (PropTypes)
+  - invocacion consistente de funciones / tablas llamables
+]=]
+
+help.es.proptypes = [=[
+======================================================================
+                        DaviLuaXML - PropTypes
+======================================================================
+
+PropTypes es un sistema opcional de validacion de props en runtime.
+
+1) Registry (por nombre de la etiqueta):
+    local t = require("DaviLuaXML.proptypes")
+    t.register("Boton", {
+        label = t.string({ required = true }),
+        disabled = t.boolean(),
+    })
+
+2) En el componente (campo propTypes):
+    local t = require("DaviLuaXML.proptypes")
+    local Boton = setmetatable({
+        propTypes = { label = t.string({ required = true }) }
+    }, { __call = function(self, props, children) ... end })
+
+Desactivar validacion:
+    require("DaviLuaXML.proptypes").enabled = false
+]=]
+
+help.es.sourcemap = [=[
+======================================================================
+                        DaviLuaXML - Sourcemaps
+======================================================================
+
+DaviLuaXML genera un mapeo simple por linea al transformar .dslx.
+
+El loader (searcher del require) y el core reescriben errores de runtime
+para apuntar a las lineas del .dslx original.
+
+LIMITACIONES:
+------------
+Es un mapeador ligero por linea (no es un sourcemap completo por columna).
+]=]
+
+help.es.treeshake = [=[
+======================================================================
+                       DaviLuaXML - Tree-shaking
+======================================================================
+
+Tree-shaking es un paso conservador del compilador.
+
+Comenta lineas `local X = require("...")` que no se usan en el resto del codigo.
+
+USO (CLI):
+---------
+    dslxc --treeshake src/ dist/
+]=]
+
+help.es.compile = [=[
+======================================================================
+                         DaviLuaXML - Compile
+======================================================================
+
+El modulo compile pre-compila archivos .dslx a .lua puro.
+
+USO:
+----
+    local compile = require("DaviLuaXML.compile")
+    compile.file("app.dslx")
+    compile.dir("src/", "dist/")
+
+CLI:
+----
+    dslxc app.dslx
+    dslxc src/ dist/
+
+OPCIONES:
+--------
+    --no-header   No agrega header
+    --treeshake   Comenta requires no usados
+]=]
 
 help.es.elements = [=[
 ======================================================================
