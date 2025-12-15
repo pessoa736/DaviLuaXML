@@ -1,4 +1,4 @@
-# Davi System Lua XML (DaviLuaXML)
+# Davi System Lua XML
 
 XML syntax for Lua - write XML directly in your Lua code, similar to JSX in JavaScript.
 
