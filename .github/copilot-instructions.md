@@ -64,7 +64,8 @@ rockspecs/            # Especificações do LuaRocks
 2. Commit das mudanças
 3. Criar tag git: `git tag X.Y-Z`
 4. Push com tags: `git push && git push --tags`
-5. Upload no LuaRocks: `luarocks upload rockspecs/daviluaxml-X.Y-Z.rockspec`
+5. fazer uma release para o github.
+6. Upload no LuaRocks: `luarocks upload rockspecs/daviluaxml-X.Y-Z.rockspec`
 
 ## Padrões de Código
 
