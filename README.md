@@ -2,11 +2,14 @@
 
 <div style="display: flex; justify-content: center; justify-self: left;">
     <img src="doc/DSLX_icon.png" width="128px" />
-    <div style="align-content: center">
-        <p>Um interpretador JSX-like para Lua.</p>
-        <p>⚠️ Projeto experimental. APIs podem mudar sem aviso.</p>
-    </div>
+    <p>Um interpretador JSX-like para Lua.</p>
+    <a href="https://luarocks.org/modules/pessoa736/daviluaxml">
+        <img src="https://img.shields.io/luarocks/v/pessoa736/daviluaxml" />
+    </a>
 </div>
+
+> [!WARNING]
+> Projeto experimental. APIs podem mudar sem aviso.
 
 ## sobre o que se trata o DSLX?
 
