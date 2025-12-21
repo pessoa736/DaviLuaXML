@@ -1,4 +1,4 @@
-# DLSX - Davi System Lua-XML
+# DSLX - Davi System Lua-XML
 
 <div style="display: flex; justify-content: center; justify-self: left;">
     <img src="doc/DSLX_icon.png" width="128px" />
@@ -11,23 +11,28 @@
 > [!WARNING]
 > Projeto experimental. APIs podem mudar sem aviso.
 
+## sumário
+
+- [Sobre o que se trata o DSLX?](#sobre-o-que-se-trata-o-dslx)
+- [Qual o objetivo?](#qual-o-é-objetivo)
+- [Status do projeto](#status-do-projeto)
+- [Como funciona?](#como-funciona)
+  - [Sintaxe](#sintaxe)
+  - [importação dos DSLX através do require](#importação-dos-dslx-através-do-require)
+- [O que DSLX não é](#o-que-dslx-não-é)
+- [Porque surgiu](#porque-surgiu)
+- [Licença](#licença)
+- [Como posso contribuir](#como-posso-contribuir)
+- [Créditos e Referências](#créditos-e-referências)
+  - [Contribuintes](#contribuintes)
+
 ## sobre o que se trata o DSLX?
 
 DSLX (ou Davi System: Lua XML) é um módulo que fornece ao Lua a capacidade de interpretar arquivos .dslx no qual permite ler código Lua e transformar o XML em Lua puro num mesmo arquivo e depois executa, parecido com o JSX.
 
-## qual o seu objetivo?
-
-Fazer uma linguagem JSX-like para Lua, com a melhor eficiência, performance, dentro do que for possivel, focando em Lua puro.
-
-## status do projeto
-
-O projeto está em estado experimental, mesmo com uma base da estrutura bem sólida, muitas APIs e muitos conceitos podem mudar a qualquer momento. E bugs são esperados.
-
-## como funciona?
-
 ```mermaid
     graph TD;
-        A("codigo em DSLX") --> B("interpreta o lua");
+        A("codígo em DSLX") --> B("interpreta o lua");
         A --> C("interpreta o XML");
         C --> D("Transforma em Lua");
         D --> E("junta os dois")
@@ -37,10 +42,19 @@ O projeto está em estado experimental, mesmo com uma base da estrutura bem sól
 
 ```
 
+## qual é o objetivo?
+
+Fazer uma linguagem JSX-like para Lua, com a melhor eficiência, performance, dentro do que for possível, focando em Lua puro.
+
+## status do projeto
+
+O projeto está em estado experimental, mesmo com uma base da estrutura bem sólida, muitas APIs e muitos conceitos podem mudar a qualquer momento. E bugs são esperados.
+
+## como funciona?
+
 ### sintaxe
 
 No .dslx qualquer função definida no ambiente do Lua pode ser chamada no formato do XML.
-
 
 ```lua
 
@@ -53,10 +67,10 @@ end
 
 -- chamando em XML
 local res = <teste arg1={1}> {2} </teste>;
-print(res) -- isso retornará para o usuario: 3 
+print(res) -- isso retornará para o usuário: 3 
 
 -- chamando self-close
-print(<teste arg1={2}/>) -- isso mostra pro usuario: 2
+print(<teste arg1={2}/>) -- isso mostra pro usuário: 2
 
 ```
 
@@ -66,7 +80,7 @@ Quando seu projeto importa o módulo do DSLX ele carrega o loader do DSLX, sobre
 
 ## o que DSLX não é
 
-- **não é html**, html é uma linguagem web para criação de paginas, o DSLX é um Lua+XML. e XML é uma linguagem de estruturação rigida para sistemas.
+- **não é html**, html é uma linguagem web para criação de páginas, o DSLX é um Lua+XML. e XML é uma linguagem de estruturação rígida para sistemas.
 
 - **não é um substituto do Lua**, o DSLX é para funcionar em conjunto ao Lua
 
@@ -79,16 +93,22 @@ caso queira da uma olhada como ta o processo de criação da framework: [Pudimwe
 
 Esse módulo é MIT. Sinta-se livre para brincar e fazer o que quiser a sua fork desse projeto, mantendo os créditos :)
 
-## contribuição
+## Como posso contribuir
 
 Qualquer um pode contribuir com o projeto. Ao encontrar qualquer problema/bug ou se tiver alguma ideia de implementação, pode abrir uma issue para relatar o problema ou fazer um fork com sua implementação.
 
-## Creditos e referências
+## Créditos e referências
 
 Criado e mantido por [Davi Passos](https://github.com/pessoa736).
+
 Inspirado em [JSX](https://facebook.github.io/jsx/) pela [Meta](https://facebook).
 
-## contribuentes
+## contribuintes
 
 - [Davi Passos](https://github.com/pessoa736)
-- [Copilot](https://github.com/MicrosoftCopilot)
+
+## ferramentas de IA utilizados
+
+- chatgpt (5, 5.1 e 5.1-codex)
+- claude 4.5 (opus e sonnet)
+- gemini 3.0 pro
