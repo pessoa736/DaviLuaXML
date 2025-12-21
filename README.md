@@ -82,3 +82,11 @@ Esse módulo é MIT. Sinta-se livre para brincar e fazer o que quiser a sua fork
 ## contribuição
 
 Qualquer um pode contribuir com o projeto. Ao encontrar qualquer problema/bug ou se tiver alguma ideia de implementação, pode abrir uma issue para relatar o problema ou fazer um fork com sua implementação.
+
+# Creditos e referências
+Criado e mantido por [Davi Passos](https://github.com/pessoa736).
+Inspirado em [JSX](https://facebook.github.io/jsx/) pela [Meta](https://facebook).
+
+## contribuentes
+- [Davi Passos](https://github.com/pessoa736)
+- [Copilot](https://github.com/MicrosoftCopilot)
