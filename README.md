@@ -22,9 +22,22 @@ O projeto está em estado experimental, mesmo com uma base da estrutura bem sól
 
 ## como funciona?
 
+```mermaid
+    graph TD;
+        A("codigo em DSLX") --> B("interpreta o lua");
+        A --> C("interpreta o XML");
+        C --> D("Transforma em Lua");
+        D --> E("junta os dois")
+        B --> E
+        E --> F("executa")
+
+
+```
+
 ### sintaxe
 
 No .dslx qualquer função definida no ambiente do Lua pode ser chamada no formato do XML.
+
 
 ```lua
 
