@@ -127,6 +127,7 @@ end
 --- @param filepath string Caminho do arquivo .dslx original
 --- @param content string Conteúdo atual do arquivo
 --- @return string|nil Código transformado do cache, ou nil se não existir
+--- @return table? map do cache
 function M.get(filepath, content)
     if not M.enabled then
         return nil
@@ -207,15 +208,21 @@ function M.clear()
 end
 
 --- Retorna estatísticas do cache.
---- @return table { files = number, size = number }
+--- @return table { files = number, size = number, dir = M.cacheDir }
 function M.stats()
-    local handle = io.popen("ls -la " .. M.cacheDir .. "/*.lua 2>/dev/null | wc -l")
-    local fileCount = tonumber(handle:read("*a"):match("%d+")) or 0
-    handle:close()
+    local handle, size, fileCount
     
+    handle = io.popen("ls -la " .. M.cacheDir .. "/*.lua 2>/dev/null | wc -l")
+    if handle then 
+        fileCount = tonumber(handle:read("*a"):match("%d+")) or 0
+        handle:close()
+    end
+        
     handle = io.popen("du -sh " .. M.cacheDir .. " 2>/dev/null")
-    local size = handle:read("*a"):match("^(%S+)") or "0"
-    handle:close()
+    if handle then 
+        size = handle:read("*a"):match("^(%S+)") or "0"
+        handle:close()
+    end 
     
     return {
         files = fileCount,

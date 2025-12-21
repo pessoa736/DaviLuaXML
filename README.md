@@ -1,198 +1,114 @@
-# Davi System Lua XML
+# DSLX - Davi System Lua-XML
 
-XML syntax for Lua - write XML directly in your Lua code, similar to JSX in JavaScript.
-
-[![LuaRocks](https://img.shields.io/luarocks/v/pessoa736/daviluaxml)](https://luarocks.org/modules/pessoa736/daviluaxml)
-
-**🌐 Language / Idioma / Idioma:** [English](README.md) | [Português](README.pt-BR.md) | [Español](README.es.md)
-
-## Installation
-
-```bash
-luarocks install daviluaxml
-```
-
-## Basic Usage
-
-```lua
--- Register the loader for .dslx files
-require("DaviLuaXML")
-
--- Now you can use require() with .dslx files
-local App = require("my_component")
-```
-
-### Example .dslx file
-
-```lua
--- component.dslx
-local function Button(props, children)
-    return string.format('<button class="%s">%s</button>', 
-        props.class, 
-        children[1]
-    )
-end
-
-local function App()
-    return <div class="container">
-        <h1>Hello World!</h1>
-        <Button class="primary">Click here</Button>
-    </div>
-end
-
-return App
-```
-
-## How It Works
-
-DaviLuaXML transforms XML tags into Lua function calls:
-
-```lua
--- This:
-local el = <div class="container">Hello</div>
-
--- Becomes:
-local el = __daviluaxml_invoke(div, 'div', {class = "container"}, {[1] = "Hello"})
-```
-
-The function receives two arguments:
-
-- `props` - table with the attributes
-- `children` - table with the children (text, numbers or other elements)
-
-## Extras
-
-### Props validation (PropTypes)
-
-If you define schemas, DaviLuaXML validates props at runtime:
-
-```lua
-local t = require("DaviLuaXML.proptypes")
-t.register("Button", {
-    label = t.string({ required = true }),
-})
-```
-
-### Sourcemaps (runtime errors)
-
-Runtime errors are rewritten to point to the original `.dslx` line numbers (simple line mapping).
-
-### Tree-shaking (compiler)
-
-The compiler can comment out unused `local X = require(...)` lines:
-
-```bash
-dslxc --treeshake src/ dist/
-```
-
-## XML Syntax
-
-### Simple tags
-
-```lua
-<div/>                          -- Self-closing tag
-<p>text</p>                     -- Tag with content
-```
-
-### Attributes
-
-```lua
-<btn class="primary"/>          -- String
-<input value={variable}/>       -- Lua expression
-<comp enabled/>                 -- Boolean (true)
-```
-
-### Expressions in braces
-
-```lua
-<sum>{1}{2}{3}</sum>            -- Multiple values
-<p>{name .. " " .. surname}</p> -- Lua expressions
-```
-
-### Nested tags
-
-```lua
-<div>
-    <span>text</span>
-    <ul>
-        <li>item 1</li>
-        <li>item 2</li>
-    </ul>
+<div style="display: flex; justify-content: center; justify-self: left;">
+    <img src="doc/DSLX_icon.png" width="128px" />
+    <p>Um interpretador JSX-like para Lua.</p>
+    <a href="https://luarocks.org/modules/pessoa736/daviluaxml">
+        <img src="https://img.shields.io/luarocks/v/pessoa736/daviluaxml" />
+    </a>
 </div>
+
+> [!WARNING]
+> Projeto experimental. APIs podem mudar sem aviso.
+
+## sumário
+
+- [Sobre o que se trata o DSLX?](#sobre-o-que-se-trata-o-dslx)
+- [Qual o objetivo?](#qual-o-é-objetivo)
+- [Status do projeto](#status-do-projeto)
+- [Como funciona?](#como-funciona)
+  - [Sintaxe](#sintaxe)
+  - [importação dos DSLX através do require](#importação-dos-dslx-através-do-require)
+- [O que DSLX não é](#o-que-dslx-não-é)
+- [Porque surgiu](#porque-surgiu)
+- [Licença](#licença)
+- [Como posso contribuir](#como-posso-contribuir)
+- [Créditos e Referências](#créditos-e-referências)
+  - [Contribuintes](#contribuintes)
+
+## sobre o que se trata o DSLX?
+
+DSLX (ou Davi System: Lua XML) é um módulo que fornece ao Lua a capacidade de interpretar arquivos .dslx no qual permite ler código Lua e transformar o XML em Lua puro num mesmo arquivo e depois executa, parecido com o JSX.
+
+```mermaid
+    graph TD;
+        A("codígo em DSLX") --> B("interpreta o lua");
+        A --> C("interpreta o XML");
+        C --> D("Transforma em Lua");
+        D --> E("junta os dois")
+        B --> E
+        E --> F("executa")
+
+
 ```
 
-### Tags with dot (namespaces)
+## qual é o objetivo?
+
+Fazer uma linguagem JSX-like para Lua, com a melhor eficiência, performance, dentro do que for possível, focando em Lua puro.
+
+## status do projeto
+
+O projeto está em estado experimental, mesmo com uma base da estrutura bem sólida, muitas APIs e muitos conceitos podem mudar a qualquer momento. E bugs são esperados.
+
+## como funciona?
+
+### sintaxe
+
+No .dslx qualquer função definida no ambiente do Lua pode ser chamada no formato do XML.
 
 ```lua
-<html.div class="x"/>           -- Becomes: html.div({class = "x"}, {})
+
+-- definindo em Lua
+function teste(props)
+    local arg1, children = props.arg1, props.children
+    
+    return arg1 + (children or 0)
+end
+
+-- chamando em XML
+local res = <teste arg1={1}> {2} </teste>;
+print(res) -- isso retornará para o usuário: 3 
+
+-- chamando self-close
+print(<teste arg1={2}/>) -- isso mostra pro usuário: 2
+
 ```
 
-## API
+### importação dos .dslx através do require
 
-### require("DaviLuaXML")
+Quando seu projeto importa o módulo do DSLX ele carrega o loader do DSLX, sobrepondo o require no ambiente no qual foi importado, permitindo importar o .dslx da mesma forma do .lua
 
-Registers the loader for `.dslx` files. After that, `require()` works with `.dslx` files.
+## o que DSLX não é
 
-### require("DaviLuaXML.core")
+- **não é html**, html é uma linguagem web para criação de páginas, o DSLX é um Lua+XML. e XML é uma linguagem de estruturação rígida para sistemas.
 
-```lua
-local lx = require("DaviLuaXML.core")
-local result, err = lx("file.dslx")
-```
+- **não é um substituto do Lua**, o DSLX é para funcionar em conjunto ao Lua
 
-Directly executes an `.dslx` file by path.
+## porque surgiu?
 
-### require("DaviLuaXML.help")
+eu estava afim de desenvolver ferramentas Lua separadas para criar uma framework web na mesma pegada do next.js e react. para isso pensei primeiro em criar um JSX-like so que Lua. comecei pincelando a ideia manualmente e depois fui pedindo ajuda ao copilot.
+caso queira da uma olhada como ta o processo de criação da framework: [Pudimweb](https://github.com/pessoa736/PudimWeb)
 
-```lua
-local help = require("DaviLuaXML.help")
-help()              -- General help
-help("syntax")      -- Specific topic
-help.list()         -- List topics
-help.lang("en")     -- Set language (en, pt, es)
-```
+## licença
 
-## Logging (Debug)
+Esse módulo é MIT. Sinta-se livre para brincar e fazer o que quiser a sua fork desse projeto, mantendo os créditos :)
 
-DaviLuaXML uses [loglua](https://github.com/pessoa736/loglua) for logging. Debug logs are in the `XMLRuntime` section:
+## Como posso contribuir
 
-```lua
-require("DaviLuaXML")
-require("my_module")
+Qualquer um pode contribuir com o projeto. Ao encontrar qualquer problema/bug ou se tiver alguma ideia de implementação, pode abrir uma issue para relatar o problema ou fazer um fork com sua implementação.
 
--- Show runtime debug logs
-log.show("XMLRuntime")
-```
+## Créditos e referências
 
-## Modules
+Criado e mantido por [Davi Passos](https://github.com/pessoa736).
 
-| Module | Description |
-|--------|-------------|
-| `init` | Registers the searcher for require() |
-| `core` | Directly executes .dslx files |
-| `parser` | Parses XML tags |
-| `transform` | Transforms XML to Lua |
-| `runtime` | Runtime invoke helper for transformed code |
-| `proptypes` | Optional runtime props validation |
-| `sourcemap` | Error line mapping for `.dslx` |
-| `treeshake` | Tree-shaking pass for compiler |
-| `compile` | Pre-compiles `.dslx` to `.lua` |
-| `elements` | Creates elements (tables) |
-| `props` | Processes attributes |
-| `errors` | Error formatting |
-| `help` | Help system |
+Inspirado em [JSX](https://facebook.github.io/jsx/) pela [Meta](https://facebook).
 
-## Tests
+## contribuintes
 
-```bash
-lua DaviLuaXML/test/run_all.lua
-```
+- [Davi Passos](https://github.com/pessoa736)
 
-## Dependencies
+## ferramentas de IA utilizados
 
-- Lua >= 5.4
-- [loglua](https://github.com/pessoa736/loglua)
-
-## License
-
-MIT
+- chatgpt (5, 5.1 e 5.1-codex)
+- claude 4.5 (opus e sonnet)
+- gemini 3.0 pro
