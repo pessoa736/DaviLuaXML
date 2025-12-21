@@ -66,7 +66,7 @@ Quando seu projeto importa o módulo do DSLX ele carrega o loader do DSLX, sobre
 
 ## o que DSLX não é
 
-- **não é html**, html é uma linguagem web para criação de paginas, o DSLX é um Lua+XML que. e XML é uma linguagem de estruturação rigida para sistemas.
+- **não é html**, html é uma linguagem web para criação de paginas, o DSLX é um Lua+XML. e XML é uma linguagem de estruturação rigida para sistemas.
 
 - **não é um substituto do Lua**, o DSLX é para funcionar em conjunto ao Lua
 
