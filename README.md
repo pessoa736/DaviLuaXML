@@ -1,198 +1,55 @@
-# Davi System Lua XML
+# DLSX - Davi System Lua-XML
 
-XML syntax for Lua - write XML directly in your Lua code, similar to JSX in JavaScript.
+Um interpretador JSX-like para lua.
 
-[![LuaRocks](https://img.shields.io/luarocks/v/pessoa736/daviluaxml)](https://luarocks.org/modules/pessoa736/daviluaxml)
+⚠️ Projeto experimental. APIs podem mudar sem aviso.
 
-**🌐 Language / Idioma / Idioma:** [English](README.md) | [Português](README.pt-BR.md) | [Español](README.es.md)
+(Depois clocar imagem)
 
-## Installation
+## sobre o que se trata o DSLX?
 
-```bash
-luarocks install daviluaxml
-```
+DSLX (ou Davi System: lua XML) é um módulo fornece ao lua a capacidade de interpretar arquivos .dslx no qual permite executar o código lua e transformar o xml em lua puro num mesmo arquivo, igual o JSX.
 
-## Basic Usage
+## qual o seu objetivo?
+
+Fazer uma linguagem JSX-like para lua, com a melhor eficiência, performance, e que for possível, usando apenas lua puro. 
+
+## status do projeto
+
+O projeto está em estado experimental, mesmo com uma base da estrutura bem sólida, muitas APIs e muitos conceitos podem mudar a qualquer momento. E bugs são esperados.
+
+## como funciona?
+
+### sintaxe
+
+No .dslx qualquer função definida no ambiente do lua pode ser chamada no formato do XML.
 
 ```lua
--- Register the loader for .dslx files
-require("DaviLuaXML")
 
--- Now you can use require() with .dslx files
-local App = require("my_component")
-```
-
-### Example .dslx file
-
-```lua
--- component.dslx
-local function Button(props, children)
-    return string.format('<button class="%s">%s</button>', 
-        props.class, 
-        children[1]
-    )
+-- definindo em lua
+function teste(props)
+    local arg1, children = props.arg1, props.children
+    
+    return arg1 + (children or 0)
 end
 
-local function App()
-    return <div class="container">
-        <h1>Hello World!</h1>
-        <Button class="primary">Click here</Button>
-    </div>
-end
+-- chamando em xml
+local res = <teste arg1={1}> {2} </teste>;
+print(res) -- isso retornara para o usuario: 3 
 
-return App
+-- chamando self-close
+print(<teste arg1={2}/>) -- isso mostra pro usuario: 2
+
 ```
 
-## How It Works
+### importação dos .dslx através do require
 
-DaviLuaXML transforms XML tags into Lua function calls:
+Quando seu projeto importa o módulo do DSLX ele carregar o loader do DSLX, sobreponto o require, permitindo importar o .dslx da mesma forma do .lua
 
-```lua
--- This:
-local el = <div class="container">Hello</div>
+## licença
 
--- Becomes:
-local el = __daviluaxml_invoke(div, 'div', {class = "container"}, {[1] = "Hello"})
-```
+Esse módulo é MIT. Sinta-se livre para brincar e fazer o que quiser a sua fork desse projeto, mantendo os creditos :)
 
-The function receives two arguments:
+## contribuição
 
-- `props` - table with the attributes
-- `children` - table with the children (text, numbers or other elements)
-
-## Extras
-
-### Props validation (PropTypes)
-
-If you define schemas, DaviLuaXML validates props at runtime:
-
-```lua
-local t = require("DaviLuaXML.proptypes")
-t.register("Button", {
-    label = t.string({ required = true }),
-})
-```
-
-### Sourcemaps (runtime errors)
-
-Runtime errors are rewritten to point to the original `.dslx` line numbers (simple line mapping).
-
-### Tree-shaking (compiler)
-
-The compiler can comment out unused `local X = require(...)` lines:
-
-```bash
-dslxc --treeshake src/ dist/
-```
-
-## XML Syntax
-
-### Simple tags
-
-```lua
-<div/>                          -- Self-closing tag
-<p>text</p>                     -- Tag with content
-```
-
-### Attributes
-
-```lua
-<btn class="primary"/>          -- String
-<input value={variable}/>       -- Lua expression
-<comp enabled/>                 -- Boolean (true)
-```
-
-### Expressions in braces
-
-```lua
-<sum>{1}{2}{3}</sum>            -- Multiple values
-<p>{name .. " " .. surname}</p> -- Lua expressions
-```
-
-### Nested tags
-
-```lua
-<div>
-    <span>text</span>
-    <ul>
-        <li>item 1</li>
-        <li>item 2</li>
-    </ul>
-</div>
-```
-
-### Tags with dot (namespaces)
-
-```lua
-<html.div class="x"/>           -- Becomes: html.div({class = "x"}, {})
-```
-
-## API
-
-### require("DaviLuaXML")
-
-Registers the loader for `.dslx` files. After that, `require()` works with `.dslx` files.
-
-### require("DaviLuaXML.core")
-
-```lua
-local lx = require("DaviLuaXML.core")
-local result, err = lx("file.dslx")
-```
-
-Directly executes an `.dslx` file by path.
-
-### require("DaviLuaXML.help")
-
-```lua
-local help = require("DaviLuaXML.help")
-help()              -- General help
-help("syntax")      -- Specific topic
-help.list()         -- List topics
-help.lang("en")     -- Set language (en, pt, es)
-```
-
-## Logging (Debug)
-
-DaviLuaXML uses [loglua](https://github.com/pessoa736/loglua) for logging. Debug logs are in the `XMLRuntime` section:
-
-```lua
-require("DaviLuaXML")
-require("my_module")
-
--- Show runtime debug logs
-log.show("XMLRuntime")
-```
-
-## Modules
-
-| Module | Description |
-|--------|-------------|
-| `init` | Registers the searcher for require() |
-| `core` | Directly executes .dslx files |
-| `parser` | Parses XML tags |
-| `transform` | Transforms XML to Lua |
-| `runtime` | Runtime invoke helper for transformed code |
-| `proptypes` | Optional runtime props validation |
-| `sourcemap` | Error line mapping for `.dslx` |
-| `treeshake` | Tree-shaking pass for compiler |
-| `compile` | Pre-compiles `.dslx` to `.lua` |
-| `elements` | Creates elements (tables) |
-| `props` | Processes attributes |
-| `errors` | Error formatting |
-| `help` | Help system |
-
-## Tests
-
-```bash
-lua DaviLuaXML/test/run_all.lua
-```
-
-## Dependencies
-
-- Lua >= 5.4
-- [loglua](https://github.com/pessoa736/loglua)
-
-## License
-
-MIT
+Qualquer um pode contribuir com o projeto. Ao encontrar qualquer problema/bug ou se tiver alguma ideia de implementação, pode abrir uma issues para relatar o problema ou fazer um fork com sua implementação.
